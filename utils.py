@@ -1,5 +1,6 @@
 import secrets
 from datetime import datetime
+from fractions import Fraction
 
 
 def generate_join_code(length: int = 8) -> str:
@@ -19,34 +20,47 @@ def format_iqd(n: float | int) -> str:
     return f"{n_int:,} IQD"
 
 
+def _round_net_fractions_to_int(net_frac_by_user_id: dict[int, Fraction]) -> dict[int, int]:
+    base = {}
+    frac_parts = []
+    base_sum = 0
+
+    for uid, net in net_frac_by_user_id.items():
+        floor_int = net.numerator // net.denominator
+        base[uid] = int(floor_int)
+        base_sum += int(floor_int)
+        frac = net - floor_int
+        frac_parts.append((uid, frac))
+
+    residual = -base_sum
+    if residual <= 0:
+        return base
+
+    frac_parts.sort(key=lambda x: (x[1], -x[0]), reverse=True)
+
+    for uid, _frac in frac_parts[:residual]:
+        base[uid] += 1
+
+    return base
+
+
 def compute_net_balances(users, expenses, participants_map):
     paid = {u.id: 0 for u in users}
-    consumed = {u.id: 0 for u in users}
+    consumed = {u.id: Fraction(0, 1) for u in users}
 
     for e in expenses:
-        paid[e.payer_id] += e.amount_iqd
-        parts = sorted(participants_map.get(e.id, []))
-        n = len(parts)
-        if n <= 0:
+        paid[e.payer_id] += int(e.amount_iqd)
+        parts = participants_map.get(e.id, [])
+        if not parts:
             continue
 
-        share_floor = e.amount_iqd // n
-        remainder = e.amount_iqd % n
-
+        n = len(parts)
+        share = Fraction(int(e.amount_iqd), n)
         for uid in parts:
-            consumed[uid] += share_floor
+            consumed[uid] += share
 
-        try:
-            start_idx = parts.index(e.payer_id)
-        except ValueError:
-            start_idx = 0
-
-        for k in range(remainder):
-            uid = parts[(start_idx + k) % n]
-            consumed[uid] += 1
-
-    net = {uid: paid[uid] - consumed[uid] for uid in paid.keys()}
-    return net
+    net_frac = {uid: Fraction(paid[uid], 1) - consumed[uid] for uid in paid.keys()}
+    return _round_net_fractions_to_int(net_frac)
 
 
 def simplify_debts(net_by_user_id):

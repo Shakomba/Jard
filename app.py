@@ -472,6 +472,9 @@ def create_app():
     app.config["PASSWORD_REQUIRE_LOWER"] = os.environ.get("PASSWORD_REQUIRE_LOWER", "0") == "1"
     app.config["EMAIL_VERIFICATION_TTL_HOURS"] = int(os.environ.get("EMAIL_VERIFICATION_TTL_HOURS", "24"))
     app.config["PASSWORD_RESET_TTL_MINUTES"] = int(os.environ.get("PASSWORD_RESET_TTL_MINUTES", "60"))
+    app.config["PASSWORD_RESET_COOLDOWN_MINUTES"] = max(
+        0, int(os.environ.get("PASSWORD_RESET_COOLDOWN_MINUTES", "5"))
+    )
     app.config["APP_BASE_URL"] = os.environ.get("APP_BASE_URL", "").strip()
     app.config["MAIL_HOST"] = os.environ.get("MAIL_HOST", "")
     app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", "587"))
@@ -480,6 +483,7 @@ def create_app():
     app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "1") == "1"
     app.config["MAIL_USE_SSL"] = os.environ.get("MAIL_USE_SSL", "0") == "1"
     app.config["MAIL_FROM"] = os.environ.get("MAIL_FROM", "no-reply@example.com")
+    app.config["MAIL_TIMEOUT_SECONDS"] = max(1, int(os.environ.get("MAIL_TIMEOUT_SECONDS", "10")))
 
     db.init_app(app)
 
@@ -552,6 +556,19 @@ def create_app():
         )
         return token
 
+    def password_reset_active(user: User) -> bool:
+        if not user.password_reset_expires_at:
+            return False
+        return user.password_reset_expires_at >= datetime.utcnow()
+
+    def password_reset_recent(user: User) -> bool:
+        if not user.password_reset_sent_at:
+            return False
+        cooldown_minutes = app.config["PASSWORD_RESET_COOLDOWN_MINUTES"]
+        if cooldown_minutes <= 0:
+            return False
+        return user.password_reset_sent_at + timedelta(minutes=cooldown_minutes) > datetime.utcnow()
+
     def email_enabled() -> bool:
         return bool(app.config["MAIL_HOST"])
 
@@ -572,21 +589,28 @@ def create_app():
         username = app.config["MAIL_USERNAME"]
         password = app.config["MAIL_PASSWORD"]
 
-        if app.config["MAIL_USE_SSL"]:
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(host, port, context=context) as smtp:
-                if username:
-                    smtp.login(username, password)
-                smtp.send_message(msg)
-        else:
-            with smtplib.SMTP(host, port) as smtp:
-                smtp.ehlo()
-                if app.config["MAIL_USE_TLS"]:
-                    context = ssl.create_default_context()
-                    smtp.starttls(context=context)
-                if username:
-                    smtp.login(username, password)
-                smtp.send_message(msg)
+        try:
+            timeout = app.config["MAIL_TIMEOUT_SECONDS"]
+            if app.config["MAIL_USE_SSL"]:
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(host, port, context=context, timeout=timeout) as smtp:
+                    smtp.ehlo()
+                    if username:
+                        smtp.login(username, password)
+                    smtp.send_message(msg)
+            else:
+                with smtplib.SMTP(host, port, timeout=timeout) as smtp:
+                    smtp.ehlo()
+                    if app.config["MAIL_USE_TLS"]:
+                        context = ssl.create_default_context()
+                        smtp.starttls(context=context)
+                        smtp.ehlo()
+                    if username:
+                        smtp.login(username, password)
+                    smtp.send_message(msg)
+        except (smtplib.SMTPException, OSError):
+            app.logger.exception("Email send failed: to=%s subject=%s", to_email, subject)
+            return False
         return True
 
     def send_verification_email(user: User, token: str) -> bool:
@@ -610,6 +634,12 @@ def create_app():
 
     def send_password_reset_email(user: User, token: str) -> bool:
         reset_url = build_external_url("reset_password", token=token)
+        if not email_enabled():
+            if app.debug or app.testing:
+                app.logger.info("Password reset URL for %s: %s", user.email, reset_url)
+                return True
+            app.logger.warning("Email not configured; password reset email not sent for %s", user.email)
+            return False
         text_body = render_template(
             "emails/reset_password.txt",
             user=user,
@@ -860,9 +890,25 @@ def create_app():
         if email:
             u = User.query.filter_by(email=email).first()
             if u:
-                reset_token = issue_password_reset(u)
-                db.session.commit()
-                send_password_reset_email(u, reset_token)
+                if password_reset_recent(u) and password_reset_active(u):
+                    pass
+                elif not (email_enabled() or app.debug or app.testing):
+                    app.logger.warning("Password reset requested but email is disabled for %s", u.email)
+                else:
+                    prev_reset = (
+                        u.password_reset_token_hash,
+                        u.password_reset_sent_at,
+                        u.password_reset_expires_at,
+                    )
+                    reset_token = issue_password_reset(u)
+                    db.session.commit()
+                    if not send_password_reset_email(u, reset_token):
+                        (
+                            u.password_reset_token_hash,
+                            u.password_reset_sent_at,
+                            u.password_reset_expires_at,
+                        ) = prev_reset
+                        db.session.commit()
         flash(t("flash.password_reset_sent"), "success")
         return redirect(url_for("login"))
 

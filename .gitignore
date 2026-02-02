@@ -21,6 +21,8 @@ env/
 # Secrets
 .env
 
-# User uploads
-static/uploads/avatars/
+# Ignore all uploaded avatars
+static/uploads/avatars/*
+# But keep the folder structure
+!static/uploads/avatars/.gitkeep
 EOF

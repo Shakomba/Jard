@@ -567,6 +567,7 @@ a[href^="mailto"],
     :root[data-theme="light"] .text-slate-400 { color: #64748b !important; }
     :root[data-theme="light"] .text-slate-500 { color: #94a3b8 !important; }
     :root[data-theme="light"] .text-violet-200 { color: #7c3aed !important; }
+    :root[data-theme="light"] .text-violet-300 { color: #6d28d9 !important; }
     :root[data-theme="light"] .text-rose-300 { color: #e11d48 !important; }
     :root[data-theme="light"] .text-emerald-300 { color: #059669 !important; }
     :root[data-theme="light"] .text-emerald-400 { color: #10b981 !important; }
@@ -576,10 +577,22 @@ a[href^="mailto"],
       background: rgba(245, 158, 11, 0.15) !important;
       color: #d97706 !important;
     }
-    :root[data-theme="light"] .household-code { 
+    :root[data-theme="light"] .household-code {
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(168, 85, 247, 0.08)) !important;
       border-color: rgba(139, 92, 246, 0.25) !important;
       color: #6d28d9 !important;
+    }
+
+    /* Purple buttons should have white text in light mode */
+    :root[data-theme="light"] .bg-violet-500,
+    :root[data-theme="light"] .bg-violet-400,
+    :root[data-theme="light"] .bg-violet-600,
+    :root[data-theme="light"] button.bg-violet-500,
+    :root[data-theme="light"] button.bg-violet-400,
+    :root[data-theme="light"] button.bg-violet-600,
+    :root[data-theme="light"] .hover\:bg-violet-400:hover,
+    :root[data-theme="light"] .hover\:bg-violet-500:hover {
+      color: #ffffff !important;
     }
 
     :root[data-theme="light"] .bg-white\/5 { background-color: rgba(15, 23, 42, 0.03) !important; }
@@ -877,14 +890,20 @@ a[href^="mailto"],
     <div id="flashMessages">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          <div class="mt-5 space-y-2 text-center">
+          <div class="{% if not is_auth_page %}mt-5{% endif %} space-y-2 text-center">
           {% for category, message in messages %}
             {% set bg = "bg-emerald-500/15 ring-emerald-400/20" if category=="success" else
                         "bg-rose-500/15 ring-rose-400/20" if category=="error" else
                         "bg-sky-500/15 ring-sky-400/20" %}
-            <div class="px-4 py-3 rounded-2xl ring-1 {{ bg }}">
+            {% if not is_auth_page or category != "error" %}
+            <div class="px-4 py-3 rounded-2xl ring-1 {{ bg }}" data-flash-category="{{ category }}" data-flash-message="{{ message }}">
               <div class="text-sm">{{ message }}</div>
             </div>
+            {% else %}
+            <div class="hidden px-4 py-3 rounded-2xl ring-1 {{ bg }}" data-flash-category="{{ category }}" data-flash-message="{{ message }}">
+              <div class="text-sm">{{ message }}</div>
+            </div>
+            {% endif %}
           {% endfor %}
           </div>
         {% endif %}

@@ -27,7 +27,6 @@
   .error-message {
     color: #ff4444 !important;
     font-weight: 500 !important;
-    display: block !important;
   }
 </style>
 <div class="min-h-screen flex items-center justify-center px-4">
@@ -94,6 +93,35 @@
 
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Check for server-side errors from flash messages
+    const flashMessages = document.querySelectorAll('[data-flash-category="error"]');
+    if (flashMessages.length > 0) {
+      // Show error for incorrect credentials
+      emailInput.classList.add('field-error', 'shake');
+      passwordInput.classList.add('field-error', 'shake');
+      passwordError.textContent = '{{ t("login.invalid_credentials") }}';
+      passwordError.classList.remove('hidden');
+      setTimeout(() => {
+        emailInput.classList.remove('shake');
+        passwordInput.classList.remove('shake');
+      }, 300);
+    }
+
+    // Clear errors when user starts typing
+    emailInput.addEventListener('input', function() {
+      emailInput.classList.remove('field-error', 'shake');
+      emailError.classList.add('hidden');
+      passwordInput.classList.remove('field-error');
+      passwordError.classList.add('hidden');
+    });
+
+    passwordInput.addEventListener('input', function() {
+      passwordInput.classList.remove('field-error', 'shake');
+      passwordError.classList.add('hidden');
+      emailInput.classList.remove('field-error');
+      emailError.classList.add('hidden');
+    });
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();

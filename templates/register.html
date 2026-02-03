@@ -27,7 +27,6 @@
   .error-message {
     color: #ff4444 !important;
     font-weight: 500 !important;
-    display: block !important;
   }
 </style>
 <div class="min-h-screen flex items-center justify-center px-4">
@@ -122,6 +121,21 @@
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    // Check for server-side errors from flash messages
+    const flashMessages = document.querySelectorAll('[data-flash-category="error"]');
+    if (flashMessages.length > 0) {
+      flashMessages.forEach(flash => {
+        const message = flash.getAttribute('data-flash-message');
+        // Show error for email already registered
+        if (message.includes('email') || message.includes('registered') || message.includes('exists')) {
+          emailInput.classList.add('field-error', 'shake');
+          emailError.textContent = message;
+          emailError.classList.remove('hidden');
+          setTimeout(() => emailInput.classList.remove('shake'), 300);
+        }
+      });
+    }
+
     function validateField(field) {
       const value = field.input.value.trim();
       const isEmpty = !value;
@@ -145,6 +159,8 @@
       if (field.input === confirmPasswordInput) {
         const password = passwordInput.value;
         if (value !== password) {
+          // Highlight BOTH password fields
+          passwordInput.classList.add('field-error', 'shake');
           field.input.classList.add('field-error', 'shake');
           field.error.textContent = '{{ t("flash.passwords_no_match") }}';
           field.error.classList.remove('hidden');
@@ -160,6 +176,13 @@
     function clearFieldError(field) {
       field.input.classList.remove('field-error', 'shake');
       field.error.classList.add('hidden');
+
+      // If clearing a password field, also clear the other password field
+      if (field.input === passwordInput || field.input === confirmPasswordInput) {
+        passwordInput.classList.remove('field-error', 'shake');
+        confirmPasswordInput.classList.remove('field-error', 'shake');
+        confirmPasswordError.classList.add('hidden');
+      }
     }
 
     // Clear errors on input

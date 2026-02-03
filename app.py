@@ -5,6 +5,7 @@ import secrets
 import smtplib
 import ssl
 from email.message import EmailMessage
+from email.utils import formataddr
 from io import BytesIO
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
@@ -723,7 +724,7 @@ def create_app():
             return True  # Return True so the flow continues
         msg = EmailMessage()
         msg["Subject"] = subject
-        msg["From"] = app.config["MAIL_FROM"]
+        msg["From"] = formataddr(("Daxli264", app.config["MAIL_FROM"]))
         msg["To"] = to_email
         msg.set_content(text_body or "")
         if html_body:

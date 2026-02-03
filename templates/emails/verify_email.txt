@@ -1,12 +1,12 @@
 Hello {{ user.name or "there" }},
 
-Your Jard verification code is:
+Your Daxli264 verification code is:
 
 {{ code }}
 
 Enter this code in the app to verify your email. This code expires in {{ ttl_hours }} hours.
 
-If you did not create a Jard account, you can ignore this email.
+If you did not create a Daxli264 account, you can ignore this email.
 
 Thanks,
-Jard
+Daxli264

@@ -440,7 +440,7 @@
         const submitBtn = createForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Creating...';
+        submitBtn.textContent = '{{ t("setup.creating") }}';
 
         await submitFormAjax(createForm, {
           onRedirect: (url) => {
@@ -458,7 +458,7 @@
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Joining...';
+      submitBtn.textContent = '{{ t("setup.joining") }}';
       if (errorEl) {
         errorEl.classList.add('hidden');
         errorEl.textContent = '';

@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 
+<!-- Mobile-only logo -->
+<div class="flex justify-center mb-8 sm:hidden">
+  <div class="h-32 w-32">
+    <img src="{{ url_for('static', filename='LogoDark.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain dark-logo">
+    <img src="{{ url_for('static', filename='LogoLight.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain light-logo hidden">
+  </div>
+</div>
+
 <div class="flex flex-col items-center text-center gap-2 mb-8">
   <h1 class="text-3xl sm:text-4xl font-bold">
     <span class="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">{{ t('dashboard.welcome') }},</span>
@@ -31,7 +39,7 @@
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl sm:text-2xl font-bold">{{ t('dashboard.spending_by_person') }}</h2>
       <div class="px-3 py-1 rounded-full bg-violet-500/20 text-violet-200 text-xs font-semibold">
-        {{ spent_by_user|length }} members
+        {{ spent_by_user|length }} {{ t('dashboard.members') }}
       </div>
     </div>
 
@@ -69,7 +77,7 @@
           <div class="text-sm font-medium text-slate-300">{{ t('dashboard.household_total') }}</div>
           {% if earliest_date %}
             <div class="mt-1 text-xs text-slate-400">
-              <span>Since {{ earliest_date }}</span>
+              <span>{{ t('dashboard.since') }} {{ earliest_date }}</span>
             </div>
           {% endif %}
         </div>
@@ -94,7 +102,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
           <p class="text-lg font-medium text-slate-200">{{ t('dashboard.no_payments') }}</p>
-          <p class="text-sm text-slate-400 mt-2">All balances are settled!</p>
+          <p class="text-sm text-slate-400 mt-2">{{ t('dashboard.all_settled') }}</p>
         </div>
       {% else %}
         <div class="space-y-4 w-full">
@@ -110,18 +118,18 @@
                          class="h-10 w-10 rounded-full object-cover ring-2 ring-white/10 bg-white/5">
                     <span class="text-sm font-semibold text-slate-100">{{ user_by_id[frm].name }}</span>
                   </div>
-                  
+
                   <svg class="w-5 h-5 text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                   </svg>
-                  
+
                   <div class="flex items-center gap-2">
                     <img src="{{ url_for('avatar', user_id=to) }}" alt="{{ user_by_id[to].name }}"
                          class="h-10 w-10 rounded-full object-cover ring-2 ring-white/10 bg-white/5">
                     <span class="text-sm font-semibold text-slate-100">{{ user_by_id[to].name }}</span>
                   </div>
                 </div>
-                
+
                 <div class="flex items-center justify-center gap-3 w-full sm:w-auto">
                   <div class="text-xl font-black {% if i_pay %}text-rose-300{% elif i_receive %}text-emerald-300{% else %}text-slate-100{% endif %}"><span class="ltr">{{ amt|iqd }}</span></div>
                 </div>

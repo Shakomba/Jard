@@ -17,7 +17,7 @@
         document.documentElement.setAttribute('data-theme', stored);
         const themeMeta = document.querySelector('meta[name="theme-color"]');
         if (themeMeta) {
-          themeMeta.setAttribute('content', stored === 'light' ? '#e2e8f0' : '#0A0A0F');
+          themeMeta.setAttribute('content', stored === 'light' ? '#f8fafc' : '#0A0A0F');
         }
       }
     })();
@@ -52,16 +52,37 @@
       --page-bg: var(--bg);
     }
     :root[data-theme="light"] {
-      --page-bg: #e2e8f0;
+      --page-bg: #f8fafc;
     }
     html,
     body {
       background-color: var(--page-bg);
+      margin: 0;
+      padding: 0;
     }
     html {
       -webkit-overflow-scrolling: touch;
       scroll-behavior: smooth;
     }
+    
+    /* Override RTL for member profiles - keep them LTR */
+    html[lang="ckb"] .soft.rounded-2xl,
+    html[lang="ckb"] .soft.rounded-3xl {
+      direction: ltr;
+    }
+    
+    /* Navbar: always keep LTR layout */
+    html[dir="rtl"] #appHeader,
+    html[dir="rtl"] #appHeader * {
+      direction: ltr;
+    }
+    
+    /* But allow nav text to be RTL */
+    html[dir="rtl"] #topNav a,
+    html[dir="rtl"] #topNav button {
+      direction: rtl;
+    }
+    
     body {
       background:
         radial-gradient(900px circle at 50% -20%, rgba(139, 92, 246, 0.10), transparent 55%),
@@ -71,11 +92,13 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       touch-action: pan-y;
+      margin: 0;
+      padding: 0;
     }
     
     /* Mobile bottom nav spacing */
     @media (max-width: 640px) {
-      body {
+      body:not(.no-mobile-padding) {
         padding-bottom: 80px;
       }
       /* Reduce backdrop-filter on mobile for better performance */
@@ -97,7 +120,7 @@
       background: rgba(18, 18, 27, 0.75);
       border: 1px solid var(--border);
       box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.2);
-      transform: translateZ(0);
+      transform: none;
     }
     .header-shell {
       backdrop-filter: blur(12px);
@@ -124,7 +147,7 @@
       }
       .mobile-bottom-nav nav {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 0.25rem;
         padding: 0 0.5rem;
       }
@@ -171,7 +194,11 @@
         background: rgba(255, 255, 255, 0.05);
       }
       
-      /* Hide desktop nav on mobile */
+      /* Hide entire header on mobile */
+      #appHeader {
+        display: none !important;
+      }
+      
       #topNav {
         display: none !important;
       }
@@ -205,12 +232,160 @@
       text-align: start;
       transition: all 0.2s ease;
     }
+
+    /* Custom select arrow utility: hides native arrow and draws a small SVG arrow
+       positioned slightly inset. Respects RTL by switching to left. */
+    .select-arrow {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23B7BAC7' stroke-width='1.6'><path stroke-linecap='round' stroke-linejoin='round' d='M6 8l4 4 4-4'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      background-size: 1rem;
+      padding-right: 2.25rem;
+    }
+    html[dir="rtl"] .select-arrow {
+      background-position: left 0.9rem center;
+      padding-left: 2.25rem;
+      padding-right: 0.75rem;
+    }
+
+    /* Beautiful dropdown options styling */
+    select option {
+      background: var(--bg-elev-2);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      border: none;
+    }
+    select option:hover {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+    select option:checked,
+    select option:selected {
+      background: var(--accent);
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Custom dropdown component */
+    .custom-select {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    .custom-select-button {
+      width: 100%;
+      padding: 0.75rem 3rem 0.75rem 1rem;
+      background: rgba(18, 18, 27, 0.85);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1rem;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    html[dir="rtl"] .custom-select-button {
+      text-align: right;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+    }
+    .custom-select-button:hover {
+      background: rgba(18, 18, 27, 0.95);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .custom-select-button:focus,
+    .custom-select-button.open {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+    .custom-select-arrow {
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      transition: transform 0.2s ease;
+      color: var(--text-3);
+      pointer-events: none;
+    }
+    html[dir="rtl"] .custom-select-arrow {
+      right: auto;
+      left: 1rem;
+    }
+
+    
+    .custom-select-button.open .custom-select-arrow {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .custom-select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      margin-top: 0.25rem;
+      background: rgba(18, 18, 27, 0.98);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.2);
+      backdrop-filter: blur(20px);
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+      transition: all 0.2s ease;
+      pointer-events: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    /* RTL adjustments: align options and ensure dropdown text reads correctly in RTL pages */
+    html[dir="rtl"] .custom-select-dropdown {
+      text-align: right;
+      direction: rtl;
+    }
+    .custom-select-dropdown.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .custom-select-option {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background-color 0.1s ease;
+      color: var(--text);
+      border-radius: 0;
+    }
+    .custom-select-option:first-child {
+      border-radius: 1rem 1rem 0 0;
+    }
+    .custom-select-option:last-child {
+      border-radius: 0 0 1rem 1rem;
+    }
+    .custom-select-option:hover {
+      background: var(--accent-soft);
+    }
+    .custom-select-option.selected {
+      background: var(--accent);
+      color: white;
+      font-weight: 500;
+    }
     .input:focus {
       background: rgba(18, 18, 27, 0.95);
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--focus);
     }
     .input::placeholder { color: rgba(183, 186, 199, 0.70); }
+    /* When the page is RTL but an auth card is forced to LTR, ensure inputs sit tight to the left edge
+       and keep space on the right for the show-password button. */
+    html[dir="rtl"] .card[dir="ltr"] .input,
+    html[dir="rtl"] .card[dir="ltr"] input.input {
+      direction: ltr !important;
+      text-align: left !important;
+      padding-left: 0.75rem !important;
+      padding-right: 3.25rem !important;
+    }
 a[href^="mailto"],
     a[x-apple-data-detectors],
     a[x-apple-data-detectors-type="email"] {
@@ -284,6 +459,11 @@ a[href^="mailto"],
     .fab:active {
       transform: scale(0.95) !important;
     }
+    /* Utility to disable scrolling when page content fits viewport */
+    html.no-scroll, body.no-scroll {
+      overflow: hidden !important;
+      height: 100% !important;
+    }
     /* Expense form visibility - prevent layout shift */
     #desktopExpenseForm {
       display: none;
@@ -308,61 +488,119 @@ a[href^="mailto"],
     }
     :root[data-theme="light"] html,
     :root[data-theme="light"] body {
-      background-color: var(--page-bg);
+      background:
+        radial-gradient(1200px circle at 50% -15%, rgba(139, 92, 246, 0.06), transparent 60%),
+        radial-gradient(800px circle at 80% 100%, rgba(236, 72, 153, 0.04), transparent 50%),
+        linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     }
     :root[data-theme="light"] .card {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(15, 23, 42, 0.1);
-      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+      background: #ffffff;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
     }
     :root[data-theme="light"] .header-shell {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(15, 23, 42, 0.08);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
     :root[data-theme="light"] .mobile-bottom-nav {
-      background: rgba(255, 255, 255, 0.95);
-      border-top: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+      background: rgba(255, 255, 255, 0.98);
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05);
     }
     :root[data-theme="light"] .mobile-nav-item:not(.active):hover {
       background: rgba(15, 23, 42, 0.05);
     }
     :root[data-theme="light"] .menu-panel {
-      background: rgba(255, 255, 255, 0.98);
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+      background: #ffffff;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.04);
     }
     :root[data-theme="light"] .soft {
-      background: rgba(203, 213, 225, 0.75);
-      border: 1px solid rgba(15, 23, 42, 0.1);
+      background: rgba(241, 245, 249, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    :root[data-theme="light"] .custom-select-button {
+      background: #ffffff;
+      border: 1.5px solid rgba(148, 163, 184, 0.3);
+      color: #0f172a;
+    }
+    :root[data-theme="light"] .custom-select-button:hover {
+      background: #f8fafc;
+      border-color: rgba(148, 163, 184, 0.4);
+    }
+    :root[data-theme="light"] .custom-select-button:focus,
+    :root[data-theme="light"] .custom-select-button.open {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    :root[data-theme="light"] .custom-select-dropdown {
+      background: #ffffff;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+    :root[data-theme="light"] .custom-select-option {
+      color: #0f172a;
+    }
+    :root[data-theme="light"] .custom-select-option:hover {
+      background: rgba(139, 92, 246, 0.08);
+    }
+    :root[data-theme="light"] .custom-select-option.selected {
+      background: var(--accent);
+      color: white;
     }
     :root[data-theme="light"] .input {
-      background: rgba(255, 255, 255, 0.98);
-      border: 1px solid rgba(15, 23, 42, 0.14);
+      background: #ffffff;
+      border: 1.5px solid rgba(148, 163, 184, 0.3);
       color: #0f172a;
     }
     :root[data-theme="light"] .input:focus {
       background: #ffffff;
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
     }
-    :root[data-theme="light"] .input::placeholder { color: rgba(71, 85, 105, 0.75); }
+    :root[data-theme="light"] .input::placeholder { color: rgba(100, 116, 139, 0.6); }
 
     :root[data-theme="light"] .text-slate-100 { color: #0f172a !important; }
     :root[data-theme="light"] .text-slate-200 { color: #1e293b !important; }
-    :root[data-theme="light"] .text-slate-300 { color: #334155 !important; }
-    :root[data-theme="light"] .text-slate-400 { color: #475569 !important; }
+    :root[data-theme="light"] .text-slate-300 { color: #475569 !important; }
+    :root[data-theme="light"] .text-slate-400 { color: #64748b !important; }
+    :root[data-theme="light"] .text-slate-500 { color: #94a3b8 !important; }
+    :root[data-theme="light"] .text-violet-200 { color: #7c3aed !important; }
+    :root[data-theme="light"] .text-rose-300 { color: #e11d48 !important; }
+    :root[data-theme="light"] .text-emerald-300 { color: #059669 !important; }
+    :root[data-theme="light"] .text-emerald-400 { color: #10b981 !important; }
+    :root[data-theme="light"] .text-rose-400 { color: #f43f5e !important; }
+    :root[data-theme="light"] .admin-warning-text { color: #d97706 !important; }
+    :root[data-theme="light"] .admin-label {
+      background: rgba(245, 158, 11, 0.15) !important;
+      color: #d97706 !important;
+    }
+    :root[data-theme="light"] .household-code { 
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(168, 85, 247, 0.08)) !important;
+      border-color: rgba(139, 92, 246, 0.25) !important;
+      color: #6d28d9 !important;
+    }
 
-    :root[data-theme="light"] .bg-white\/5 { background-color: rgba(15, 23, 42, 0.04) !important; }
-    :root[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.08) !important; }
-    :root[data-theme="light"] .bg-white\/15 { background-color: rgba(15, 23, 42, 0.12) !important; }
-    :root[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.12) !important; }
-    :root[data-theme="light"] .bg-black\/40 { background-color: rgba(15, 23, 42, 0.16) !important; }
-    :root[data-theme="light"] .bg-black\/70 { background-color: rgba(15, 23, 42, 0.45) !important; }
+    :root[data-theme="light"] .bg-white\/5 { background-color: rgba(15, 23, 42, 0.03) !important; }
+    :root[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.06) !important; }
+    :root[data-theme="light"] .bg-white\/15 { background-color: rgba(15, 23, 42, 0.09) !important; }
+    :root[data-theme="light"] .bg-black\/20 { background-color: rgba(15, 23, 42, 0.08) !important; }
+    :root[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.15) !important; }
+    :root[data-theme="light"] .bg-black\/40 { background-color: rgba(15, 23, 42, 0.2) !important; }
+    :root[data-theme="light"] .bg-black\/70 { background-color: rgba(15, 23, 42, 0.5) !important; }
+    :root[data-theme="light"] .bg-black\/50 { background-color: rgba(15, 23, 42, 0.3) !important; }
+    :root[data-theme="light"] .bg-violet-500\/20 { background-color: rgba(139, 92, 246, 0.15) !important; }
+    :root[data-theme="light"] .bg-violet-500\/30 { background-color: rgba(139, 92, 246, 0.2) !important; }
 
-    :root[data-theme="light"] .border-white\/10 { border-color: rgba(15, 23, 42, 0.12) !important; }
-    :root[data-theme="light"] .border-white\/20 { border-color: rgba(15, 23, 42, 0.18) !important; }
-    :root[data-theme="light"] .ring-white\/10 { --tw-ring-color: rgba(15, 23, 42, 0.12) !important; }
-    :root[data-theme="light"] .ring-white\/15 { --tw-ring-color: rgba(15, 23, 42, 0.16) !important; }
+    :root[data-theme="light"] .border-white\/10 { border-color: rgba(148, 163, 184, 0.2) !important; }
+    :root[data-theme="light"] .border-white\/20 { border-color: rgba(148, 163, 184, 0.3) !important; }
+    :root[data-theme="light"] .border-violet-400\/30 { border-color: rgba(139, 92, 246, 0.3) !important; }
+    :root[data-theme="light"] .ring-white\/10 { --tw-ring-color: rgba(148, 163, 184, 0.25) !important; }
+    :root[data-theme="light"] .ring-white\/15 { --tw-ring-color: rgba(148, 163, 184, 0.35) !important; }
+    :root[data-theme="light"] .ring-rose-400\/40 { --tw-ring-color: rgba(251, 113, 133, 0.4) !important; }
+    :root[data-theme="light"] .ring-emerald-400\/40 { --tw-ring-color: rgba(52, 211, 153, 0.4) !important; }
+    :root[data-theme="light"] .ring-violet-400\/60 { --tw-ring-color: rgba(167, 139, 250, 0.5) !important; }
 
     .ltr {
       direction: ltr;
@@ -371,14 +609,14 @@ a[href^="mailto"],
     .text-start { text-align: start; }
     .text-end { text-align: end; }
 
+    /* Theme-aware logo switching */
+    .dark-logo { display: block; }
+    .light-logo { display: none; }
+    :root[data-theme="light"] .dark-logo { display: none; }
+    :root[data-theme="light"] .light-logo { display: block; }
+
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .auth-fixed-header #appHeader {
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
-    }
     
     /* Page transition animations */
     @keyframes fadeInUp {
@@ -456,35 +694,33 @@ a[href^="mailto"],
 
 {% set ep = request.endpoint or "" %}
 {% set is_auth_page = ep in ["login", "register", "register_verify", "register_profile", "forgot_password", "reset_password", "verify_required", "setup_household"] %}
-{% set hide_auth_brand = ep in ["login", "register"] %}
-{% set is_fixed_auth_header = ep in ["login", "register"] and not hide_auth_brand %}
+{% set hide_navbar = ep in ["login", "register", "register_verify", "register_profile", "setup_household"] %}
 
-<body class="min-h-screen text-slate-100{% if is_fixed_auth_header %} auth-fixed-header{% endif %}">
-  <div id="appRoot" class="max-w-7xl mx-auto px-4 {% if hide_auth_brand %}py-6{% elif is_fixed_auth_header %}pt-24 pb-6{% elif is_auth_page %}pt-20 pb-6{% else %}py-6{% endif %}">
+<body class="min-h-screen text-slate-100{% if hide_navbar %} no-mobile-padding{% endif %}">
+  <div id="appRoot" class="{% if not hide_navbar %}max-w-7xl mx-auto px-4 {% if is_auth_page %}pt-20 pb-6{% else %}py-6{% endif %}{% endif %}" style="overflow: visible;">
     {% set next_lang = "en" if lang == "ku" else "ku" %}
-    <header id="appHeader" class="{% if is_auth_page %}fixed inset-x-0 top-0 bg-[var(--bg)]/95 backdrop-blur-sm border-b border-white/5{% elif is_fixed_auth_header %}fixed inset-x-0 top-0{% else %}sticky top-0{% endif %} z-50 {% if is_auth_page %}{% if hide_auth_brand %}px-0 py-0{% else %}px-4 py-4{% endif %}{% else %}header-shell rounded-3xl px-4 py-3 sm:px-6{% endif %}">
+    {% if not hide_navbar %}
+    <header id="appHeader" class="{% if is_auth_page %}fixed inset-x-0 top-0 bg-[var(--bg)]/95 backdrop-blur-sm border-b border-white/5 px-4 py-4{% else %}sticky top-0 header-shell rounded-3xl px-4 py-3 sm:px-6{% endif %} z-50" style="overflow: visible;">
       <div class="{% if is_auth_page %}flex flex-col items-center text-center gap-2{% else %}flex flex-col gap-4 sm:grid sm:grid-cols-[auto,1fr,auto] sm:items-center{% endif %}">
-        {% if is_auth_page %}
-          {% if not hide_auth_brand %}
+        {% if is_auth_page and not hide_navbar %}
             <div class="flex items-center justify-center gap-3">
-              <div class="h-10 w-10 rounded-xl overflow-hidden bg-white/5 ring-1 ring-white/10 shadow-lg">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-cover">
+              <div class="h-12 w-12">
+                <img src="{{ url_for('static', filename='LogoDark.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain dark-logo transform scale-150 origin-center">
+                <img src="{{ url_for('static', filename='LogoLight.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain light-logo hidden transform scale-150 origin-center">
               </div>
-              <div class="text-xl font-bold">{{ t('app.name') }}</div>
             </div>
-          {% endif %}
         {% else %}
           <div class="flex items-center justify-between w-full sm:contents">
             <a href="{{ url_for('dashboard') }}" class="flex items-center justify-start gap-3 text-start sm:col-start-1 sm:row-start-1">
-              <div class="h-10 w-10 rounded-2xl overflow-hidden bg-white/5 ring-1 ring-white/10">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-cover">
+              <div class="h-12 w-12 ml-3">
+                <img src="{{ url_for('static', filename='LogoDark.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain dark-logo transform scale-150 origin-center">
+                <img src="{{ url_for('static', filename='LogoLight.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain light-logo hidden transform scale-150 origin-center">
               </div>
-              <div class="text-xl font-semibold leading-tight">Jard</div>
             </a>
             {% if current_user.is_authenticated and not is_auth_page %}
               <div class="flex items-center gap-1.5 sm:col-start-3 sm:row-start-1 sm:justify-self-end">
                 <!-- Language Toggle -->
-                <form method="post" action="{{ url_for('set_language') }}" class="inline">
+                <form id="langForm" method="post" action="{{ url_for('set_language') }}" class="inline">
                   <input type="hidden" name="lang" value="{{ next_lang }}">
                   <input type="hidden" name="next" value="{{ request.full_path if request.query_string else request.path }}">
                   <button type="submit"
@@ -589,6 +825,7 @@ a[href^="mailto"],
         {% endif %}
       </div>
     </header>
+    {% endif %}
 
     <!-- Mobile Bottom Navigation -->
     {% if current_user.is_authenticated and not is_auth_page and has_household %}
@@ -624,6 +861,13 @@ a[href^="mailto"],
           </svg>
           <span>{{ t('nav.archive') }}</span>
         </a>
+        <a href="{{ url_for('profile') }}" class="mobile-nav-item {{ 'active' if ep=='profile' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>{{ t('menu.settings') }}</span>
+        </a>
       </nav>
     </div>
     {% endif %}
@@ -647,7 +891,7 @@ a[href^="mailto"],
       {% endwith %}
     </div>
 
-    <main id="appMain" class="mt-6 flex flex-col items-center">
+    <main id="appMain" class="{% if not hide_navbar %}mt-6{% endif %} flex flex-col items-center">
       <div class="w-full">
         {% block content %}{% endblock %}
       </div>
@@ -655,8 +899,8 @@ a[href^="mailto"],
   </div>
 
   <!-- Mobile FAB for adding expense (only shown on expenses page) -->
-  {% if ep == 'expenses' %}
-  <button id="openExpenseFormMobile" style="position: fixed !important; bottom: 90px !important; right: 1rem !important; z-index: 40 !important; width: 56px !important; height: 56px !important; border-radius: 50% !important; background: linear-gradient(135deg, #8B5CF6, #a855f7) !important; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 2px 8px rgba(0,0,0,0.3) !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; border: none !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important;">
+  {% if current_user.is_authenticated and not is_auth_page and has_household %}
+  <button id="openExpenseFormMobile" style="position: fixed !important; bottom: 90px !important; right: 1rem !important; z-index: 60 !important; width: 56px !important; height: 56px !important; border-radius: 50% !important; background: linear-gradient(135deg, #8B5CF6, #a855f7) !important; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 2px 8px rgba(0,0,0,0.3) !important; display: {{ 'flex' if ep == 'expenses' else 'none' }} !important; align-items: center !important; justify-content: center !important; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; border: none !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important;">
     <svg style="width: 1.5rem; height: 1.5rem; color: white;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
     </svg>
@@ -690,6 +934,162 @@ a[href^="mailto"],
       </div>
     </div>
   </div>
+
+  <!-- First Visit Welcome Modal -->
+  <div id="welcomeModal" class="hidden fixed inset-0 z-[110] items-center justify-center p-4" style="background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(6px);">
+    <div class="card rounded-3xl p-8 max-w-sm w-full text-center transform transition-all duration-300" id="welcomeModalContent" style="opacity: 0; transform: scale(0.95);">
+      <!-- Theme Selection -->
+      <div class="mb-8">
+        <div class="flex justify-center gap-4">
+          <button type="button" id="welcomeThemeDark" class="welcome-theme-btn no-hover w-20 h-20 rounded-2xl bg-[#0A0A0F] border-2 border-white/20 flex items-center justify-center transition-all">
+            <svg class="w-10 h-10 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+            </svg>
+          </button>
+          <button type="button" id="welcomeThemeLight" class="welcome-theme-btn no-hover w-20 h-20 rounded-2xl bg-[#e2e8f0] border-2 border-slate-300 flex items-center justify-center transition-all">
+            <svg class="w-10 h-10 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="4"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.95 6.95-1.41-1.41M7.46 7.46 6.05 6.05m12.9 0-1.41 1.41M7.46 16.54l-1.41 1.41"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Language Selection -->
+      <div class="flex justify-center gap-3 mb-8">
+        <button type="button" id="welcomeLangKu" class="welcome-lang-btn no-hover flex-1 py-4 rounded-2xl bg-white/10 border-2 border-white/10 transition-all font-bold text-xl">
+          کوردی
+        </button>
+        <button type="button" id="welcomeLangEn" class="welcome-lang-btn no-hover flex-1 py-4 rounded-2xl bg-white/10 border-2 border-white/10 transition-all font-bold text-xl">
+          English
+        </button>
+      </div>
+
+      <!-- Continue Button -->
+      <button type="button" id="welcomeContinueBtn" class="w-full py-4 rounded-2xl bg-violet-500 hover:bg-violet-400 transition font-bold text-lg"
+              data-en="{{ t('common.continue', lang='en') }}" data-ku="{{ t('common.continue', lang='ku') }}">
+        {{ t('common.continue') }}
+      </button>
+
+      <p id="welcomeNote" class="mt-4 text-xs text-slate-400"
+         data-en="{{ t('welcome.change_later_note', lang='en') }}"
+         data-ku="{{ t('welcome.change_later_note', lang='ku') }}">
+        {{ t('welcome.change_later_note') }}
+      </p>
+    </div>
+  </div>
+
+  <style>
+    .welcome-theme-btn:not(.selected):hover,
+    .welcome-lang-btn:not(.selected):hover {
+      transform: scale(1.05);
+      border-color: #a78bfa !important;
+    }
+    .welcome-theme-btn.selected,
+    .welcome-lang-btn.selected {
+      box-shadow: 0 0 0 2px #8b5cf6;
+      border-color: #8b5cf6 !important;
+    }
+  </style>
+
+  <script>
+    // First Visit Welcome Modal
+    (function() {
+      const welcomeModal = document.getElementById('welcomeModal');
+      const welcomeContent = document.getElementById('welcomeModalContent');
+      const themeDarkBtn = document.getElementById('welcomeThemeDark');
+      const themeLightBtn = document.getElementById('welcomeThemeLight');
+      const langKuBtn = document.getElementById('welcomeLangKu');
+      const langEnBtn = document.getElementById('welcomeLangEn');
+      const continueBtn = document.getElementById('welcomeContinueBtn');
+
+      if (!welcomeModal) return;
+
+      // Check if first visit
+      const hasVisited = localStorage.getItem('hasVisited');
+      if (hasVisited) return;
+
+      // Show modal
+      welcomeModal.classList.remove('hidden');
+      welcomeModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+
+      requestAnimationFrame(() => {
+        welcomeContent.style.opacity = '1';
+        welcomeContent.style.transform = 'scale(1)';
+      });
+
+      let selectedTheme = 'dark';
+      let selectedLang = 'en';
+
+      function selectTheme(theme) {
+        selectedTheme = theme;
+        const root = document.documentElement;
+        root.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+
+        // Update button styles
+        themeDarkBtn.classList.toggle('selected', theme === 'dark');
+        themeLightBtn.classList.toggle('selected', theme === 'light');
+
+        // Sync theme color meta
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) {
+          themeMeta.setAttribute('content', theme === 'light' ? '#e2e8f0' : '#0A0A0F');
+        }
+      }
+
+      function selectLang(lang) {
+        selectedLang = lang;
+
+        // Update button styles
+        langKuBtn.classList.toggle('selected', lang === 'ku');
+        langEnBtn.classList.toggle('selected', lang === 'en');
+
+        // Update text content based on language
+        const noteEl = document.getElementById('welcomeNote');
+        if (continueBtn) continueBtn.textContent = continueBtn.dataset[lang];
+        if (noteEl) noteEl.textContent = noteEl.dataset[lang];
+
+        // Save language preference to localStorage and cookie
+        localStorage.setItem('lang', lang);
+        document.cookie = `lang=${lang};path=/;max-age=31536000;SameSite=Lax`;
+      }
+
+      function closeWelcomeModal(shouldReload) {
+        welcomeContent.style.opacity = '0';
+        welcomeContent.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          welcomeModal.classList.add('hidden');
+          welcomeModal.classList.remove('flex');
+          document.body.style.overflow = '';
+
+          // Reload page to apply the new language
+          if (shouldReload) {
+            window.location.reload();
+          }
+        }, 200);
+      }
+
+      themeDarkBtn.addEventListener('click', () => selectTheme('dark'));
+      themeLightBtn.addEventListener('click', () => selectTheme('light'));
+      langKuBtn.addEventListener('click', () => selectLang('ku'));
+      langEnBtn.addEventListener('click', () => selectLang('en'));
+
+      // Continue button - save, close, and reload to apply language
+      continueBtn.addEventListener('click', () => {
+        localStorage.setItem('hasVisited', 'true');
+        // Check if selected language differs from current page language
+        const currentPageLang = '{{ lang }}';
+        const needsReload = selectedLang !== currentPageLang;
+        closeWelcomeModal(needsReload);
+      });
+
+      // Select defaults
+      selectTheme('dark');
+      selectLang('en');
+    })();
+  </script>
 
   <script>
     (function() {
@@ -830,6 +1230,17 @@ a[href^="mailto"],
         if (themeBtn) {
           const next = currentTheme() === 'dark' ? 'light' : 'dark';
           setTheme(next);
+          return;
+        }
+
+        // Language toggle - set cookie and reload page
+        const langBtn = e.target.closest ? e.target.closest('#langToggleBtn') : null;
+        if (langBtn) {
+          const nextLang = langBtn.dataset.next;
+          localStorage.setItem('lang', nextLang);
+          document.cookie = `lang=${nextLang};path=/;max-age=31536000;SameSite=Lax`;
+          // Reload page to apply new language
+          window.location.reload();
           return;
         }
 

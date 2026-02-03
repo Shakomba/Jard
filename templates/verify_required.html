@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="flex flex-col items-center gap-8">
-  <div class="card rounded-3xl p-8 max-w-xl mx-auto text-center">
+<div class="flex items-center justify-center px-4" style="min-height: 100vh; padding: 40px 1rem;">
+  <div class="card rounded-3xl p-6 max-w-xl w-full text-center">
     <div class="mb-6">
       <svg class="w-20 h-20 mx-auto text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -29,7 +29,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span>Verifying...</span>
+          <span>{{ t('verify.verifying') }}</span>
         </div>
       </div>
     </form>

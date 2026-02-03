@@ -20,9 +20,94 @@
     75% { transform: translateX(-3px); }
     100% { transform: translateX(0); }
   }
+
+  /* Custom Archive Filter Dropdowns */
+  .archive-select {
+    position: relative;
+    z-index: 50;
+  }
+  .archive-select.open {
+    z-index: 100;
+  }
+  .archive-select-btn {
+    cursor: pointer;
+    text-align: start;
+  }
+  .archive-select-btn:hover {
+    background: rgba(18, 18, 27, 0.95);
+    border-color: rgba(255,255,255,0.18);
+  }
+  .archive-select-btn:focus,
+  .archive-select-btn.open {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--focus);
+  }
+  .archive-select-btn.open .archive-select-arrow {
+    transform: rotate(180deg);
+  }
+  .archive-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+    margin-top: 0.5rem;
+    background: rgba(18, 18, 27, 0.98);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3);
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+  .archive-select-dropdown.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .archive-select-option {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text);
+    border-radius: 0.875rem;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  .archive-select-option:last-child {
+    margin-bottom: 0;
+  }
+  .archive-select-option:hover {
+    background: rgba(139, 92, 246, 0.15);
+  }
+  .archive-select-option.selected {
+    background: var(--accent);
+    color: white;
+  }
+  .archive-select-option.selected:hover {
+    background: var(--accent);
+  }
+  @media (min-width: 641px) {
+    .archive-select-dropdown {
+      padding: 0.375rem;
+    }
+    .archive-select-option {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.875rem;
+      border-radius: 0.625rem;
+      margin-bottom: 0.125rem;
+    }
+  }
 </style>
 
-<div class="flex flex-col items-center gap-6">
+<div class="flex flex-col items-center gap-6" style="overflow: visible;">
   <!-- Header -->
   <div class="flex flex-col items-center text-center gap-2 mb-2">
     <h1 class="text-3xl sm:text-4xl font-bold">
@@ -47,7 +132,7 @@
   </div>
 
   <!-- Filter Card -->
-  <div class="w-full max-w-2xl card rounded-3xl p-5 sm:p-6">
+  <div class="w-full max-w-2xl card rounded-3xl p-5 sm:p-6" style="overflow: visible; position: relative; z-index: 300;">
     <div class="flex items-center gap-3 mb-4">
       <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -55,33 +140,63 @@
       <span class="text-base font-semibold text-slate-100">{{ t('common.filter') }}</span>
     </div>
 
-    <form id="archiveFilterForm" method="get" action="{{ url_for('archive') }}" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-wrap">
-      <select id="sortSel" name="sort" class="flex-1 min-w-0 h-12 px-4 rounded-2xl input text-sm">
-        <option value="settle" {% if sort=='settle' %}selected{% endif %}>{{ t('archive.sort_settle') }}</option>
-        <option value="person" {% if sort=='person' %}selected{% endif %}>{{ t('archive.sort_person') }}</option>
-      </select>
+    <form id="archiveFilterForm" method="get" action="{{ url_for('archive') }}" class="flex flex-col gap-4 sm:flex-row sm:gap-3 items-stretch sm:items-center flex-wrap" style="overflow: visible;">
+      <!-- Sort By Dropdown -->
+      <input type="hidden" name="sort" id="sortInput" value="{{ sort or 'settle' }}">
+      <div class="archive-select flex-1 min-w-0" id="sortSelect">
+        <button type="button" class="archive-select-btn w-full h-[72px] sm:h-12 px-6 sm:px-4 rounded-2xl input text-lg sm:text-sm font-medium flex items-center justify-between">
+          <span class="archive-select-value">{{ t('archive.sort_settle') if sort == 'settle' or not sort else t('archive.sort_person') }}</span>
+          <svg class="archive-select-arrow w-5 h-5 sm:w-4 sm:h-4 text-slate-400 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/>
+          </svg>
+        </button>
+        <div class="archive-select-dropdown">
+          <div class="archive-select-option {{ 'selected' if sort == 'settle' or not sort else '' }}" data-value="settle">{{ t('archive.sort_settle') }}</div>
+          <div class="archive-select-option {{ 'selected' if sort == 'person' else '' }}" data-value="person">{{ t('archive.sort_person') }}</div>
+        </div>
+      </div>
 
-      <select id="settleSel" name="settle" class="flex-1 min-w-0 h-12 px-4 rounded-2xl input text-sm {% if sort!='settle' %}hidden{% endif %}">
-        <option value="" {% if not selected_settle %}selected{% endif %}>{{ t('archive.all_settles') }}</option>
-        {% for s in settles %}
-          <option value="{{ s.id }}" {% if selected_settle==s.id %}selected{% endif %}>{{ s.label }}</option>
-        {% endfor %}
-      </select>
+      <!-- Settle Period Dropdown -->
+      <input type="hidden" name="settle" id="settleInput" value="{{ selected_settle or '' }}">
+      <div class="archive-select flex-1 min-w-0 {% if sort == 'person' %}hidden{% endif %}" id="settleSelect">
+        <button type="button" class="archive-select-btn w-full h-[72px] sm:h-12 px-6 sm:px-4 rounded-2xl input text-lg sm:text-sm font-medium flex items-center justify-between">
+          <span class="archive-select-value">{% if selected_settle %}{% for s in settles %}{% if s.id == selected_settle %}{{ s.label }}{% endif %}{% endfor %}{% else %}{{ t('archive.all_settles') }}{% endif %}</span>
+          <svg class="archive-select-arrow w-5 h-5 sm:w-4 sm:h-4 text-slate-400 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/>
+          </svg>
+        </button>
+        <div class="archive-select-dropdown">
+          <div class="archive-select-option {{ 'selected' if not selected_settle else '' }}" data-value="">{{ t('archive.all_settles') }}</div>
+          {% for s in settles %}
+            <div class="archive-select-option {{ 'selected' if selected_settle == s.id else '' }}" data-value="{{ s.id }}">{{ s.label }}</div>
+          {% endfor %}
+        </div>
+      </div>
 
-      <select id="personSel" name="person" class="flex-1 min-w-0 h-12 px-4 rounded-2xl input text-sm {% if sort!='person' %}hidden{% endif %}">
-        <option value="" {% if not filter_person %}selected{% endif %}>{{ t('archive.all_members') }}</option>
-        {% for m in members %}
-          <option value="{{ m.id }}" {% if filter_person == m.id|string %}selected{% endif %}>{{ m.name }}</option>
-        {% endfor %}
-      </select>
+      <!-- Person Dropdown -->
+      <input type="hidden" name="person" id="personInput" value="{{ filter_person or '' }}">
+      <div class="archive-select flex-1 min-w-0 {% if sort != 'person' %}hidden{% endif %}" id="personSelect">
+        <button type="button" class="archive-select-btn w-full h-[72px] sm:h-12 px-6 sm:px-4 rounded-2xl input text-lg sm:text-sm font-medium flex items-center justify-between">
+          <span class="archive-select-value">{% if filter_person %}{% for m in members %}{% if m.id|string == filter_person %}{{ m.name }}{% endif %}{% endfor %}{% else %}{{ t('archive.all_members') }}{% endif %}</span>
+          <svg class="archive-select-arrow w-5 h-5 sm:w-4 sm:h-4 text-slate-400 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/>
+          </svg>
+        </button>
+        <div class="archive-select-dropdown">
+          <div class="archive-select-option {{ 'selected' if not filter_person else '' }}" data-value="">{{ t('archive.all_members') }}</div>
+          {% for m in members %}
+            <div class="archive-select-option {{ 'selected' if filter_person == m.id|string else '' }}" data-value="{{ m.id }}">{{ m.name }}</div>
+          {% endfor %}
+        </div>
+      </div>
 
-      <div class="flex gap-2">
-        <button type="submit" class="flex-1 sm:flex-none px-5 py-3 rounded-2xl bg-violet-500 hover:bg-violet-400 transition text-sm font-semibold text-white">
+      <div class="flex gap-3 sm:gap-2 mt-2 sm:mt-0">
+        <button type="submit" class="flex-1 sm:flex-none px-8 sm:px-5 h-[72px] sm:h-12 rounded-2xl bg-violet-500 hover:bg-violet-400 transition text-lg sm:text-sm font-bold text-white">
           {{ t('common.filter') }}
         </button>
         {% if selected_settle or filter_person or sort != 'settle' %}
-          <a href="{{ url_for('archive') }}" class="flex-1 sm:flex-none px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 transition text-sm font-semibold text-center">
-            Clear
+          <a href="{{ url_for('archive') }}" class="flex-1 sm:flex-none px-8 sm:px-5 h-[72px] sm:h-12 rounded-2xl bg-white/10 hover:bg-white/15 transition text-lg sm:text-sm font-bold flex items-center justify-center">
+            {{ t('expenses.clear_filter') }}
           </a>
         {% endif %}
       </div>
@@ -93,7 +208,7 @@
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl sm:text-2xl font-bold">{{ t('archive.archived_expenses') }}</h2>
       <div class="px-3 py-1 rounded-full bg-violet-500/20 text-violet-200 text-xs font-semibold">
-        {{ archived|length }} items
+        {{ archived|length }} {{ t('archive.items') }}
       </div>
     </div>
 
@@ -103,7 +218,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
         </svg>
         <p class="text-lg font-medium text-slate-200">{{ t('archive.no_archived') }}</p>
-        <p class="text-sm text-slate-400 mt-2">Settled expenses will appear here</p>
+        <p class="text-sm text-slate-400 mt-2">{{ t('archive.settled_appear_here') }}</p>
       </div>
     {% else %}
       <div class="space-y-3">
@@ -224,24 +339,94 @@
 {% endif %}
 
 <script>
+  // Custom dropdown logic for archive filters
   (function () {
-    const sortSel = document.getElementById('sortSel');
-    const settleSel = document.getElementById('settleSel');
-    const personSel = document.getElementById('personSel');
-    if (!sortSel || !settleSel || !personSel) return;
+    const sortSelect = document.getElementById('sortSelect');
+    const settleSelect = document.getElementById('settleSelect');
+    const personSelect = document.getElementById('personSelect');
+    const sortInput = document.getElementById('sortInput');
+    const settleInput = document.getElementById('settleInput');
+    const personInput = document.getElementById('personInput');
 
-    function sync() {
-      const v = (sortSel.value || 'settle');
+    if (!sortSelect || !settleSelect || !personSelect) return;
+
+    // Initialize all custom dropdowns
+    document.querySelectorAll('.archive-select').forEach(select => {
+      const btn = select.querySelector('.archive-select-btn');
+      const dropdown = select.querySelector('.archive-select-dropdown');
+      const valueDisplay = select.querySelector('.archive-select-value');
+      const options = select.querySelectorAll('.archive-select-option');
+
+      if (!btn || !dropdown) return;
+
+      // Toggle dropdown on button click
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Close all other dropdowns
+        document.querySelectorAll('.archive-select').forEach(other => {
+          if (other !== select) {
+            other.querySelector('.archive-select-btn')?.classList.remove('open');
+            other.querySelector('.archive-select-dropdown')?.classList.remove('open');
+          }
+        });
+
+        // Toggle this dropdown
+        const isOpen = dropdown.classList.contains('open');
+        btn.classList.toggle('open', !isOpen);
+        dropdown.classList.toggle('open', !isOpen);
+      });
+
+      // Handle option selection
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          const value = option.dataset.value;
+          const text = option.textContent.trim();
+
+          // Update display
+          if (valueDisplay) valueDisplay.textContent = text;
+
+          // Update hidden input
+          const inputId = select.id.replace('Select', 'Input');
+          const input = document.getElementById(inputId);
+          if (input) input.value = value;
+
+          // Update selected state
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+
+          // Close dropdown
+          btn.classList.remove('open');
+          dropdown.classList.remove('open');
+
+          // Sync visibility if sort changed
+          if (select.id === 'sortSelect') {
+            syncFilterVisibility(value);
+          }
+        });
+      });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.archive-select')) {
+        document.querySelectorAll('.archive-select-btn').forEach(btn => btn.classList.remove('open'));
+        document.querySelectorAll('.archive-select-dropdown').forEach(dd => dd.classList.remove('open'));
+      }
+    });
+
+    // Sync settle/person dropdown visibility based on sort value
+    function syncFilterVisibility(sortValue) {
+      const v = sortValue || 'settle';
       if (v === 'settle') {
-        settleSel.classList.remove('hidden');
-        personSel.classList.add('hidden');
+        settleSelect.classList.remove('hidden');
+        personSelect.classList.add('hidden');
       } else {
-        personSel.classList.remove('hidden');
-        settleSel.classList.add('hidden');
+        personSelect.classList.remove('hidden');
+        settleSelect.classList.add('hidden');
       }
     }
-    sortSel.addEventListener('change', sync);
-    sync();
 
     // Handle filter form with AJAX navigation
     const filterForm = document.getElementById('archiveFilterForm');

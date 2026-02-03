@@ -53,7 +53,7 @@
         <div>
           <label class="text-sm text-slate-200">{{ t('register.name_label') }}</label>
           <input name="name" type="text" required value="{{ current_user.name }}"
-                 class="mt-1 w-full px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400">
+                 class="mt-1 w-full px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400" dir="ltr">
         </div>
         <div>
           <label class="text-sm text-slate-200">{{ t('register.email_label') }}</label>
@@ -70,7 +70,7 @@
             <div class="relative">
               <input id="currentPassword" name="current_password" type="password"
                      class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-                     placeholder="{{ t('profile.current_password_placeholder') }}">
+                     dir="ltr">
               <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('currentPassword', this)">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -84,7 +84,8 @@
             <label class="text-sm text-slate-200">{{ t('profile.new_password') }}</label>
             <div class="relative">
               <input id="newPassword" name="new_password" type="password"
-                     class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400">
+                     class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+                     dir="ltr">
               <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('newPassword', this)">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -98,7 +99,8 @@
             <label class="text-sm text-slate-200">{{ t('profile.confirm_new_password') }}</label>
             <div class="relative">
               <input id="confirmNewPassword" name="confirm_password" type="password"
-                     class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400">
+                     class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+                     dir="ltr">
               <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('confirmNewPassword', this)">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -109,11 +111,62 @@
             </div>
           </div>
         </div>
-        <div class="mt-2 text-xs text-slate-300">{{ t('profile.password_help') }}</div>
       </div>
 
-      <button type="submit" class="w-full py-3 rounded-2xl bg-violet-500 hover:bg-violet-400 transition font-semibold">
+      <button type="submit" class="w-full py-3 rounded-2xl bg-violet-500 hover:bg-violet-400 transition font-semibold text-white">
         {{ t('profile.save_changes') }}
+      </button>
+    </form>
+  </div>
+
+  <div class="card rounded-3xl p-6">
+    <div class="mb-4">
+      <h2 class="text-xl font-semibold">{{ t('profile.preferences') }}</h2>
+      <div class="text-sm text-slate-300">{{ t('profile.preferences_subtitle') }}</div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-sm text-slate-200">{{ t('profile.language') }}</label>
+        <div class="custom-select mt-1">
+          <button type="button" class="custom-select-button" data-select="language">
+            <span class="custom-select-value">{{ 'English' if lang == 'en' else 'کوردی' }}</span>
+            <svg class="custom-select-arrow w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/>
+            </svg>
+          </button>
+          <div class="custom-select-dropdown">
+            <div class="custom-select-option {{ 'selected' if lang == 'en' else '' }}" data-value="en">English</div>
+            <div class="custom-select-option {{ 'selected' if lang == 'ku' else '' }}" data-value="ku">کوردی</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="text-sm text-slate-200">{{ t('profile.theme') }}</label>
+        <div class="custom-select mt-1">
+          <button type="button" class="custom-select-button" data-select="theme">
+            <span class="custom-select-value">{{ t('profile.dark') }}</span>
+            <svg class="custom-select-arrow w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/>
+            </svg>
+          </button>
+          <div class="custom-select-dropdown">
+            <div class="custom-select-option selected" data-value="dark">{{ t('profile.dark') }}</div>
+            <div class="custom-select-option" data-value="light">{{ t('profile.light') }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile-only logout button -->
+  <div class="card rounded-3xl p-6 sm:hidden">
+    <form method="post" action="{{ url_for('logout') }}">
+      <button type="submit" class="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 transition font-medium text-white shadow-lg shadow-rose-500/20">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        {{ t('menu.logout') }}
       </button>
     </form>
   </div>
@@ -138,7 +191,7 @@
           <div class="relative">
             <input id="deletePassword" name="password" type="password" required
                    class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-                   placeholder="{{ t('common.password_placeholder') }}">
+                   placeholder="{{ t('common.password_placeholder') }}" dir="ltr">
             <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('deletePassword', this)">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -171,6 +224,233 @@
       objectUrl = URL.createObjectURL(file);
       preview.src = objectUrl;
     });
+
+    // Custom dropdown functionality with portal to body to avoid clipping
+    function initCustomDropdowns() {
+      const buttons = Array.from(document.querySelectorAll('.custom-select-button'));
+      // link each dropdown to its originating button so options still find the button after portaling
+      buttons.forEach(b => {
+        const d = b.nextElementSibling;
+        if (d) d._button = b;
+      });
+
+      function openDropdown(button, dropdown) {
+        // close others
+        buttons.forEach(b => {
+          if (b !== button) {
+            closeDropdown(b, b.nextElementSibling);
+          }
+        });
+
+        // remember original place
+        if (!dropdown._originalParent) {
+          dropdown._originalParent = dropdown.parentElement;
+          dropdown._originalNext = dropdown.nextSibling;
+        }
+
+        const rect = button.getBoundingClientRect();
+        const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
+        dropdown.style.position = 'absolute';
+        if (isRtl) {
+          // position using right so the dropdown anchors to the button's right edge
+          const right = Math.max(0, window.innerWidth - rect.right - 0);
+          dropdown.style.right = right + 'px';
+          dropdown.style.left = 'auto';
+        } else {
+          dropdown.style.left = rect.left + 'px';
+          dropdown.style.right = 'auto';
+        }
+        dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+        dropdown.style.width = rect.width + 'px';
+        dropdown.style.zIndex = 9999;
+        dropdown.classList.add('open');
+        button.classList.add('open');
+
+        document.body.appendChild(dropdown);
+
+        // reposition on scroll/resize
+        dropdown._reposition = () => {
+          const r = button.getBoundingClientRect();
+          const rtlNow = document.documentElement.getAttribute('dir') === 'rtl';
+          if (rtlNow) {
+            dropdown.style.right = Math.max(0, window.innerWidth - r.right) + 'px';
+            dropdown.style.left = 'auto';
+          } else {
+            dropdown.style.left = r.left + 'px';
+            dropdown.style.right = 'auto';
+          }
+          dropdown.style.top = (r.bottom + window.scrollY) + 'px';
+          dropdown.style.width = r.width + 'px';
+        };
+        window.addEventListener('scroll', dropdown._reposition);
+        window.addEventListener('resize', dropdown._reposition);
+      }
+
+      function closeDropdown(button, dropdown) {
+        if (!dropdown) return;
+        dropdown.classList.remove('open');
+        button.classList.remove('open');
+        // restore
+        if (dropdown._originalParent) {
+          if (dropdown._originalNext) {
+            dropdown._originalParent.insertBefore(dropdown, dropdown._originalNext);
+          } else {
+            dropdown._originalParent.appendChild(dropdown);
+          }
+        }
+        dropdown.style.position = '';
+        dropdown.style.left = '';
+        dropdown.style.right = '';
+        dropdown.style.top = '';
+        dropdown.style.width = '';
+        dropdown.style.zIndex = '';
+
+        if (dropdown._reposition) {
+          window.removeEventListener('scroll', dropdown._reposition);
+          window.removeEventListener('resize', dropdown._reposition);
+          dropdown._reposition = null;
+        }
+      }
+
+      // click outside closes
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-select')) {
+          buttons.forEach(b => closeDropdown(b, b.nextElementSibling));
+        }
+      });
+
+      // setup buttons
+      buttons.forEach(button => {
+        const dropdown = button.nextElementSibling;
+        button.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (button.classList.contains('open')) {
+            closeDropdown(button, dropdown);
+          } else {
+            openDropdown(button, dropdown);
+          }
+        });
+      });
+
+      // option clicks
+      document.querySelectorAll('.custom-select-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const dropdown = option.closest('.custom-select-dropdown');
+          const button = dropdown._button || dropdown.previousElementSibling;
+          const valueSpan = button.querySelector('.custom-select-value');
+          const selectType = button.dataset.select;
+
+          dropdown.querySelectorAll('.custom-select-option').forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          valueSpan.textContent = option.textContent;
+
+          closeDropdown(button, dropdown);
+
+          if (selectType === 'language') {
+            handleLanguageChange(option.dataset.value);
+          } else if (selectType === 'theme') {
+            handleThemeChange(option.dataset.value);
+          }
+        });
+      });
+
+      // set initial theme display
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      const themeButton = document.querySelector('[data-select="theme"]');
+      const themeValue = themeButton?.querySelector('.custom-select-value');
+      const themeOptions = document.querySelectorAll('[data-select="theme"] + .custom-select-dropdown .custom-select-option');
+      if (themeValue && themeOptions) {
+        themeOptions.forEach(opt => opt.classList.remove('selected'));
+        const currentThemeOption = Array.from(themeOptions).find(opt => opt.dataset.value === currentTheme);
+        if (currentThemeOption) {
+          currentThemeOption.classList.add('selected');
+          themeValue.textContent = currentThemeOption.textContent;
+        }
+      }
+    }
+
+    async function handleLanguageChange(lang) {
+      const formData = new FormData();
+      formData.append('lang', lang);
+      formData.append('next', window.location.pathname);
+
+      try {
+        const response = await fetch('{{ url_for('set_language') }}', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin'
+        });
+        
+        if (response.ok || response.redirected) {
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Language change failed:', error);
+      }
+    }
+
+    function handleThemeChange(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      // Update theme color meta
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) {
+        themeMeta.setAttribute('content', theme === 'light' ? '#e2e8f0' : '#0A0A0F');
+      }
+    }
+
+    // Initialize dropdowns
+    initCustomDropdowns();
+
+    // Handle language and theme changes (legacy)
+    const languageSelect = document.getElementById('languageSelect');
+    const themeSelect = document.getElementById('themeSelect');
+
+    // Set current theme in select
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    if (themeSelect) {
+      themeSelect.value = currentTheme;
+    }
+
+    // Language change handler
+    if (languageSelect) {
+      languageSelect.addEventListener('change', async () => {
+        const formData = new FormData();
+        formData.append('lang', languageSelect.value);
+        formData.append('next', window.location.pathname);
+
+        try {
+          const response = await fetch('{{ url_for('set_language') }}', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+          });
+          
+          if (response.ok || response.redirected) {
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('Language change failed:', error);
+        }
+      });
+    }
+
+    // Theme change handler
+    if (themeSelect) {
+      themeSelect.addEventListener('change', () => {
+        const theme = themeSelect.value;
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        // Update theme color meta
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) {
+          themeMeta.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0A0A0F');
+        }
+      });
+    }
 
     // Handle profile update with AJAX
     const profileForm = document.getElementById('profileUpdateForm');

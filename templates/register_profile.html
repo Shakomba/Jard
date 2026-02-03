@@ -1,14 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="flex flex-col items-center gap-8">
-  <div class="card rounded-3xl p-8 w-full max-w-md text-center">
-    <div class="mb-6">
-      <svg class="w-16 h-16 mx-auto text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-      </svg>
-    </div>
+<div class="flex items-center justify-center px-4" style="min-height: 100vh; padding: 40px 1rem;">
+  <div class="card rounded-3xl p-6 w-full max-w-md text-center">
     <h1 class="text-3xl font-bold">{{ t('register.profile_step_title') }}</h1>
-    <p class="mt-2 text-slate-400">{{ t('register.profile_step_subtitle') }}</p>
 
     <form id="profileForm" class="mt-8 space-y-6" method="post" action="{{ url_for('register_profile_post') }}" enctype="multipart/form-data">
       <!-- Avatar Upload -->
@@ -94,7 +88,7 @@
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
-      submitBtn.textContent = '...';
+      submitBtn.textContent = '{{ t("common.saving") }}';
 
       // Use regular form submission for file upload
       form.submit();

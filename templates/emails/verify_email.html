@@ -1,29 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ lang }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Verify your Jard email</title>
+    <title>{{ t('email.verify.subject') }}</title>
   </head>
-  <body style="margin:0;padding:0;background:#f8fafc;color:#0f172a;font-family:Arial, sans-serif;">
+  <body style="margin:0;padding:0;background:#f8fafc;color:#0f172a;font-family:Arial, sans-serif;" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">
     <div style="max-width:560px;margin:0 auto;padding:24px;">
       <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;">
-        <h1 style="margin:0 0 12px;font-size:20px;">Verify your email</h1>
-        <p style="margin:0 0 12px;">Hi {{ user.name or "there" }},</p>
-        <p style="margin:0 0 16px;">Your Jard verification code is:</p>
+        <h1 style="margin:0 0 12px;font-size:20px;">{{ t('verify.title') }}</h1>
+        <p style="margin:0 0 12px;">{{ t('email.greeting') }} {{ user.name or t('email.there') }},</p>
+        <p style="margin:0 0 16px;">{{ t('email.verify.code_is') }}</p>
         <p style="margin:0 0 16px;text-align:center;">
           <span style="display:inline-block;background:#4f46e5;color:#ffffff;font-size:32px;font-weight:bold;letter-spacing:8px;padding:16px 24px;border-radius:12px;">
             {{ code }}
           </span>
         </p>
         <p style="margin:0 0 16px;font-size:14px;color:#475569;">
-          Enter this code in the app to verify your email. This code expires in {{ ttl_hours }} hours.
+          {{ t('email.verify.code_help', ttl_hours=ttl_hours) }}
         </p>
         <p style="margin:0;font-size:12px;color:#64748b;">
-          If you did not create a Jard account, you can ignore this email.
+          {{ t('email.ignore_if_not_requested_account') }}
         </p>
       </div>
-      <p style="margin:16px 0 0;font-size:12px;color:#64748b;">Jard</p>
+      <p style="margin:16px 0 0;font-size:12px;color:#64748b;">{{ t('app.name') }}</p>
     </div>
   </body>
 </html>

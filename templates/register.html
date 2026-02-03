@@ -17,33 +17,49 @@
   }
   .field-error {
     border-color: #FF453A !important;
-    box-shadow: 0 0 0 2px rgba(255, 69, 58, 0.4) !important;
+    outline: 2px solid rgba(255, 69, 58, 0.4) !important;
+    outline-offset: 0px !important;
+  }
+  .field-error:focus {
+    outline: 2px solid rgba(255, 69, 58, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(255, 69, 58, 0.2) !important;
+  }
+  .error-message {
+    color: #ff4444 !important;
+    font-weight: 500 !important;
+    display: block !important;
   }
 </style>
-<div class="flex flex-col items-center gap-8">
-  <div class="card rounded-3xl p-8 w-full max-w-xl text-center">
-    <h1 class="text-3xl font-bold">{{ t('register.title') }}</h1>
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="card rounded-3xl p-8 w-full max-w-md">
+    <div class="h-32 w-32 mx-auto mb-6">
+      <img src="{{ url_for('static', filename='LogoDark.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain dark-logo">
+      <img src="{{ url_for('static', filename='LogoLight.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain light-logo hidden">
+    </div>
+    <div class="text-center">
+      <h1 class="text-3xl font-bold mb-6">{{ t('register.title') }}</h1>
+    </div>
 
     <form id="registerForm" class="mt-6 space-y-4" method="post" action="{{ url_for('register_post', next=request.args.get('next')) }}">
       {% if request.args.get('next') %}
         <input type="hidden" name="next" value="{{ request.args.get('next') }}">
       {% endif %}
 
-      <div class="text-start">
-        <label class="text-sm text-slate-200">{{ t('register.email_label') }}</label>
-        <input id="registerEmail" name="email" type="email" autocomplete="email" autocapitalize="none" spellcheck="false"
-               class="mt-1 w-full px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-               placeholder="{{ t('register.email_placeholder') }}" dir="ltr" />
-        <div id="emailError" class="mt-1 text-xs text-rose-400 hidden"></div>
+      <div class="{{ 'text-end' if lang == 'ku' else '' }}">
+        <label class="text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.email_label') }}</label>
+         <input id="registerEmail" name="email" type="email" autocomplete="email" autocapitalize="none" spellcheck="false"
+           class="mt-1 w-full h-12 px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+           placeholder="{{ t('register.email_placeholder') }}" dir="ltr" />
+        <div id="emailError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
-      <div class="text-start">
-        <label class="text-sm text-slate-200">{{ t('register.password_label') }}</label>
+      <div class="{{ 'text-end' if lang == 'ku' else '' }}">
+        <label class="text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.password_label') }}</label>
         <div class="relative">
-          <input id="registerPassword" name="password" type="password" autocomplete="new-password"
-                 class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-                 placeholder="{{ t('register.password_placeholder') }}" />
-          <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('registerPassword', this)">
+              <input id="registerPassword" name="password" type="password" autocomplete="new-password"
+                class="mt-1 w-full h-12 px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+                placeholder="{{ t('register.password_placeholder') }}" dir="ltr" />
+            <button type="button" style="right:.75rem;left:auto" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('registerPassword', this)">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -51,16 +67,16 @@
             </svg>
           </button>
         </div>
-        <div id="passwordFieldError" class="mt-1 text-xs text-rose-400 hidden"></div>
+        <div id="passwordFieldError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
-      <div class="text-start">
-        <label class="text-sm text-slate-200">{{ t('register.confirm_password_label') }}</label>
+      <div class="{{ 'text-end' if lang == 'ku' else '' }}">
+        <label class="text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.confirm_password_label') }}</label>
         <div class="relative">
-          <input id="registerConfirmPassword" name="confirm_password" type="password" autocomplete="new-password"
-                 class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-                 placeholder="{{ t('register.password_placeholder') }}" />
-          <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('registerConfirmPassword', this)">
+              <input id="registerConfirmPassword" name="confirm_password" type="password" autocomplete="new-password"
+                class="mt-1 w-full h-12 px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+                placeholder="{{ t('register.password_placeholder') }}" dir="ltr" />
+            <button type="button" style="right:.75rem;left:auto" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('registerConfirmPassword', this)">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -68,7 +84,7 @@
             </svg>
           </button>
         </div>
-        <div id="confirmPasswordError" class="mt-1 text-xs text-rose-400 hidden"></div>
+        <div id="confirmPasswordError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
       <div class="pt-2">
@@ -78,37 +94,67 @@
       </div>
     </form>
 
-    <div class="mt-4 text-sm text-slate-300">
-      <a class="text-violet-300 font-semibold"
+    <div class="mt-4 text-sm text-slate-300 text-center">
+      <a class="text-violet-300 font-semibold inline-block"
          href="{{ url_for('login', next=request.args.get('next')) }}">{{ t('register.have_account') }}</a>
     </div>
   </div>
 
 <script>
-  // Empty field validation
+  // Comprehensive validation
   (function () {
     const form = document.getElementById('registerForm');
     if (!form) return;
 
+    const emailInput = document.getElementById('registerEmail');
+    const passwordInput = document.getElementById('registerPassword');
+    const confirmPasswordInput = document.getElementById('registerConfirmPassword');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordFieldError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
+
     const fields = [
-      { input: document.getElementById('registerEmail'), error: document.getElementById('emailError'), message: 'Please enter your email' },
-      { input: document.getElementById('registerPassword'), error: document.getElementById('passwordFieldError'), message: 'Please enter a password' },
-      { input: document.getElementById('registerConfirmPassword'), error: document.getElementById('confirmPasswordError'), message: 'Please confirm your password' }
+      { input: emailInput, error: emailError, message: '{{ t("register.email_required") }}' },
+      { input: passwordInput, error: passwordError, message: '{{ t("register.password_required") }}' },
+      { input: confirmPasswordInput, error: confirmPasswordError, message: '{{ t("register.confirm_password_required") }}' }
     ];
 
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     function validateField(field) {
-      const isEmpty = !field.input.value.trim();
+      const value = field.input.value.trim();
+      const isEmpty = !value;
       
       if (isEmpty) {
         field.input.classList.add('field-error', 'shake');
         field.error.textContent = field.message;
         field.error.classList.remove('hidden');
-      } else {
-        field.input.classList.remove('field-error');
-        field.error.classList.add('hidden');
+        return false;
       }
       
-      return !isEmpty;
+      // Additional email format validation
+      if (field.input === emailInput && !emailRegex.test(value)) {
+        field.input.classList.add('field-error', 'shake');
+        field.error.textContent = '{{ t("register.email_invalid") }}';
+        field.error.classList.remove('hidden');
+        return false;
+      }
+      
+      // Password match validation
+      if (field.input === confirmPasswordInput) {
+        const password = passwordInput.value;
+        if (value !== password) {
+          field.input.classList.add('field-error', 'shake');
+          field.error.textContent = '{{ t("flash.passwords_no_match") }}';
+          field.error.classList.remove('hidden');
+          return false;
+        }
+      }
+      
+      field.input.classList.remove('field-error');
+      field.error.classList.add('hidden');
+      return true;
     }
 
     function clearFieldError(field) {
@@ -149,18 +195,81 @@
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Creating account...';
+      submitBtn.textContent = '{{ t("register.creating_account") }}';
 
-      await submitFormAjax(form, {
-        onRedirect: (url) => {
-          window.location.href = url;
-        },
-        onError: () => {
+      try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+
+        if (response.ok && response.redirected) {
+          // Success - redirect
+          window.location.href = response.url;
+          return;
+        }
+
+        if (response.status === 400) {
+          // Handle validation error
+          const data = await response.json();
+          if (data.error === 'email_exists') {
+            const emailField = fields.find(f => f.input.id === 'registerEmail');
+            emailField.input.classList.add('field-error', 'shake');
+            emailField.error.textContent = data.message || '{{ t("flash.email_registered") }}';
+            emailField.error.classList.remove('hidden');
+            emailField.input.focus();
+            
+            setTimeout(() => {
+              emailField.input.classList.remove('shake');
+            }, 300);
+          }
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
+          return;
         }
-      });
+
+        // For other responses, follow redirect
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else {
+          // Try to get redirect URL from response
+          const text = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          window.location.href = response.url || window.location.href;
+        }
+      } catch (error) {
+        console.error('Form submission error:', error);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
     });
+  })();
+</script>
+<script>
+  (function () {
+    function updateAuthScrollLock() {
+      try {
+        const fits = document.documentElement.scrollHeight <= window.innerHeight;
+        if (fits) {
+          document.documentElement.classList.add('no-scroll');
+          document.body.classList.add('no-scroll');
+        } else {
+          document.documentElement.classList.remove('no-scroll');
+          document.body.classList.remove('no-scroll');
+        }
+      } catch (e) {}
+    }
+    let _t = null;
+    function debounced() { clearTimeout(_t); _t = setTimeout(updateAuthScrollLock, 60); }
+    window.addEventListener('load', updateAuthScrollLock);
+    window.addEventListener('resize', debounced);
+    updateAuthScrollLock();
   })();
 </script>
 {% endblock %}

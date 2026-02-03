@@ -45,16 +45,16 @@
         <input type="hidden" name="next" value="{{ request.args.get('next') }}">
       {% endif %}
 
-      <div class="{{ 'text-end' if lang == 'ku' else 'text-start' }}">
-        <label class="block w-full text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.email_label') }}</label>
+      <div>
+        <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.email_label') }}</label>
          <input id="registerEmail" name="email" type="email" autocomplete="email" autocapitalize="none" spellcheck="false"
            class="mt-1 w-full h-12 px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
            placeholder="{{ t('register.email_placeholder') }}" dir="ltr" />
-        <div id="emailError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
+        <div id="emailError" style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="mt-1 text-xs error-message hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
-      <div class="{{ 'text-end' if lang == 'ku' else 'text-start' }}">
-        <label class="block w-full text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.password_label') }}</label>
+      <div>
+        <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.password_label') }}</label>
         <div class="relative">
               <input id="registerPassword" name="password" type="password" autocomplete="new-password"
                 class="mt-1 w-full h-12 px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
@@ -67,11 +67,11 @@
             </svg>
           </button>
         </div>
-        <div id="passwordFieldError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
+        <div id="passwordFieldError" style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="mt-1 text-xs error-message hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
-      <div class="{{ 'text-end' if lang == 'ku' else 'text-start' }}">
-        <label class="block w-full text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.confirm_password_label') }}</label>
+      <div>
+        <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.confirm_password_label') }}</label>
         <div class="relative">
               <input id="registerConfirmPassword" name="confirm_password" type="password" autocomplete="new-password"
                 class="mt-1 w-full h-12 px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
@@ -84,7 +84,7 @@
             </svg>
           </button>
         </div>
-        <div id="confirmPasswordError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
+        <div id="confirmPasswordError" style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="mt-1 text-xs error-message hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
       <div class="pt-2">

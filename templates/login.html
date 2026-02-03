@@ -45,16 +45,16 @@
         <input type="hidden" name="next" value="{{ request.args.get('next') }}">
       {% endif %}
 
-      <div class="{{ 'text-end' if lang == 'ku' else 'text-start' }}">
-        <label class="block w-full text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('login.email_label') }}</label>
+      <div>
+        <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('login.email_label') }}</label>
          <input id="loginEmail" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false"
            class="mt-1 w-full h-12 px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
            placeholder="{{ t('login.email_placeholder') }}" dir="ltr" />
-        <div id="emailError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
+        <div id="emailError" style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="mt-1 text-xs error-message hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
-      <div class="{{ 'text-end' if lang == 'ku' else 'text-start' }}">
-        <label class="block w-full text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('login.password_label') }}</label>
+      <div>
+        <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('login.password_label') }}</label>
         <div class="relative">
              <input id="loginPassword" name="password" type="password" autocomplete="current-password"
                class="mt-1 w-full h-12 px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
@@ -67,7 +67,7 @@
             </svg>
           </button>
         </div>
-        <div id="passwordError" class="mt-1 text-xs error-message {{ 'text-end' if lang == 'ku' else 'text-start' }} hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
+        <div id="passwordError" style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="mt-1 text-xs error-message hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
       <button type="submit" class="w-full py-3 rounded-2xl bg-violet-500 hover:bg-violet-400 transition font-semibold">
@@ -90,11 +90,12 @@
     const passwordInput = document.getElementById('loginPassword');
     const emailError = document.getElementById('emailError');
     const passwordError = document.getElementById('passwordError');
-    
+    const submitButton = form.querySelector('button[type="submit"]');
+
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    form.addEventListener('submit', async function(e) {
+
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
       let hasError = false;
 
@@ -129,44 +130,22 @@
         passwordInput.classList.add('field-error', 'shake');
         passwordError.textContent = '{{ t("login.password_required") }}';
         passwordError.classList.remove('hidden');
+        if (!hasError) {
+          passwordInput.focus();
+          hasError = true;
+        }
         return;
       }
 
+      // If there are validation errors, stop here
+      if (hasError) {
+        return;
+      }
+
+      // Submit the form normally
       submitButton.disabled = true;
       submitButton.textContent = '{{ t("login.logging_in") }}';
-
-      try {
-        const response = await submitFormAjax(form, {
-          onRedirect: async (url) => {
-            // If redirected back to login page, it means login failed
-            const urlObj = new URL(url, window.location.origin);
-            if (urlObj.pathname === '/login' || urlObj.pathname.endsWith('/login')) {
-              // Login failed - show error
-              passwordInput.classList.add('field-error', 'shake');
-              emailInput.classList.add('field-error', 'shake');
-              passwordError.textContent = '{{ t("login.invalid_credentials") }}';
-              passwordError.classList.remove('hidden');
-              submitButton.disabled = false;
-              submitButton.textContent = '{{ t("login.login") }}';
-
-              setTimeout(() => {
-                passwordInput.classList.remove('shake');
-                emailInput.classList.remove('shake');
-              }, 300);
-            } else {
-              // Login successful, proceed with redirect
-              window.location.href = url;
-            }
-          },
-          onError: () => {
-            submitButton.disabled = false;
-            submitButton.textContent = '{{ t("login.login") }}';
-          }
-        });
-      } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = '{{ t("login.login") }}';
-      }
+      form.submit();
     });
   })();
 </script>

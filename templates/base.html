@@ -694,7 +694,7 @@ a[href^="mailto"],
 
 {% set ep = request.endpoint or "" %}
 {% set is_auth_page = ep in ["login", "register", "register_verify", "register_profile", "forgot_password", "reset_password", "verify_required", "setup_household"] %}
-{% set hide_navbar = ep in ["login", "register", "register_verify", "register_profile", "setup_household"] %}
+{% set hide_navbar = ep in ["login", "register", "register_verify", "register_profile", "setup_household", "forgot_password"] %}
 
 <body class="min-h-screen text-slate-100{% if hide_navbar %} no-mobile-padding{% endif %}">
   <div id="appRoot" class="{% if not hide_navbar %}max-w-7xl mx-auto px-4 {% if is_auth_page %}pt-20 pb-6{% else %}py-6{% endif %}{% endif %}" style="overflow: visible;">
@@ -702,7 +702,7 @@ a[href^="mailto"],
     {% if not hide_navbar %}
     <header id="appHeader" class="{% if is_auth_page %}fixed inset-x-0 top-0 bg-[var(--bg)]/95 backdrop-blur-sm border-b border-white/5 px-4 py-4{% else %}sticky top-0 header-shell rounded-3xl px-4 py-3 sm:px-6{% endif %} z-50" style="overflow: visible;">
       <div class="{% if is_auth_page %}flex flex-col items-center text-center gap-2{% else %}flex flex-col gap-4 sm:grid sm:grid-cols-[auto,1fr,auto] sm:items-center{% endif %}">
-        {% if is_auth_page and not hide_navbar %}
+        {% if is_auth_page and not hide_navbar and ep != 'forgot_password' %}
             <div class="flex items-center justify-center gap-3">
               <div class="h-12 w-12">
                 <img src="{{ url_for('static', filename='LogoDark.png') }}" alt="{{ t('common.logo') }}" class="h-full w-full object-contain dark-logo transform scale-150 origin-center">
@@ -756,7 +756,7 @@ a[href^="mailto"],
                     </svg>
                   </button>
 
-                  <div id="menuPanel" class="menu-panel absolute {{ 'left-0' if lang == 'ku' else 'right-0' }} top-full mt-2 w-48 card rounded-2xl p-2 z-50">
+                  <div id="menuPanel" class="menu-panel absolute right-0 top-full mt-2 w-48 card rounded-2xl p-2 z-50">
                     <div class="flex flex-col gap-1">
                       <a href="{{ url_for('profile') }}"
                          class="w-full px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-sm font-medium inline-flex items-center gap-2.5">

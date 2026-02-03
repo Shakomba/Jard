@@ -27,12 +27,12 @@
       </div>
 
       <!-- Name Input -->
-      <div class="{{ 'text-end' if lang == 'ku' else 'text-start' }}">
-        <label class="block w-full text-sm text-slate-200 {{ 'text-end' if lang == 'ku' else 'text-start' }}" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.name_label') }}</label>
+      <div>
+        <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('register.name_label') }}</label>
         <input id="nameInput" name="name" type="text" autocomplete="name"
                class="mt-1 w-full px-4 py-3 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
                placeholder="{{ t('register.name_placeholder') }}" autofocus />
-        <div id="nameError" class="mt-2 text-sm text-rose-400 hidden"></div>
+        <div id="nameError" style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="mt-2 text-sm text-rose-400 hidden" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}"></div>
       </div>
 
       <button type="submit" class="w-full py-3 rounded-2xl bg-violet-500 hover:bg-violet-400 transition font-semibold">

@@ -1504,8 +1504,11 @@ def create_app():
                     h.owner_id = first.user_id
                     db.session.commit()
 
+            # Check if this is the last member
+            is_last_member = Membership.query.filter_by(household_id=hid).count() == 1
+            
             # If admin is leaving, transfer ownership to next oldest member
-            if h.owner_id == current_user.id:
+            if h.owner_id == current_user.id and not is_last_member:
                 next_member = Membership.query.filter(
                     Membership.household_id == hid,
                     Membership.user_id != current_user.id
@@ -1513,12 +1516,13 @@ def create_app():
                 
                 if next_member:
                     h.owner_id = next_member.user_id
-                else:
-                    # Last member, delete household
-                    db.session.delete(h)
 
-            # Remove membership for this specific household
+            # Remove membership FIRST (before potentially deleting household)
             Membership.query.filter_by(user_id=current_user.id, household_id=hid).delete()
+            
+            # If this was the last member, delete the household
+            if is_last_member:
+                db.session.delete(h)
 
             db.session.commit()
             flash(t("flash.left_household"), "success")

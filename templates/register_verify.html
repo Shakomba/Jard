@@ -36,8 +36,8 @@
 
     <div class="mt-8 space-y-3">
       <p class="text-sm text-slate-400">{{ t('verify.didnt_receive') }}</p>
-      <form method="post" action="{{ url_for('register_resend_code') }}">
-        <button type="submit" class="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/15 transition font-semibold">
+      <form method="post" action="{{ url_for('register_resend_code') }}" id="resendForm">
+        <button type="submit" id="resendBtn" class="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/15 transition font-semibold">
           {{ t('verify.resend_button') }}
         </button>
       </form>
@@ -184,6 +184,83 @@
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       submitCode();
+    });
+  })();
+
+  // Resend button cooldown
+  (function() {
+    const resendBtn = document.getElementById('resendBtn');
+    const resendForm = document.getElementById('resendForm');
+    const COOLDOWN_KEY = 'resend_cooldown_register';
+    const COOLDOWN_DURATION = 60; // seconds
+
+    if (!resendBtn || !resendForm) return;
+
+    function updateButton(secondsLeft) {
+      if (secondsLeft > 0) {
+        resendBtn.disabled = true;
+        resendBtn.textContent = `{{ t('verify.resend_button') }} (${secondsLeft}s)`;
+        resendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        resendBtn.classList.remove('hover:bg-white/15');
+      } else {
+        resendBtn.disabled = false;
+        resendBtn.textContent = '{{ t('verify.resend_button') }}';
+        resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        resendBtn.classList.add('hover:bg-white/15');
+      }
+    }
+
+    function startCooldown() {
+      const endTime = Date.now() + (COOLDOWN_DURATION * 1000);
+      localStorage.setItem(COOLDOWN_KEY, endTime.toString());
+      runCooldown();
+    }
+
+    function runCooldown() {
+      const endTime = parseInt(localStorage.getItem(COOLDOWN_KEY) || '0');
+      const now = Date.now();
+      const secondsLeft = Math.ceil((endTime - now) / 1000);
+
+      if (secondsLeft > 0) {
+        updateButton(secondsLeft);
+        setTimeout(runCooldown, 1000);
+      } else {
+        localStorage.removeItem(COOLDOWN_KEY);
+        updateButton(0);
+      }
+    }
+
+    // Check for existing cooldown on load
+    const existingCooldown = localStorage.getItem(COOLDOWN_KEY);
+    if (existingCooldown) {
+      runCooldown();
+    }
+
+    // Handle resend form submission
+    resendForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (resendBtn.disabled) return;
+
+      const originalText = resendBtn.textContent;
+      resendBtn.disabled = true;
+      resendBtn.textContent = '{{ t("common.sending") }}...';
+
+      try {
+        const response = await fetch(resendForm.action, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+
+        if (response.ok) {
+          startCooldown();
+        } else {
+          resendBtn.disabled = false;
+          resendBtn.textContent = originalText;
+        }
+      } catch (err) {
+        resendBtn.disabled = false;
+        resendBtn.textContent = originalText;
+      }
     });
   })();
 </script>

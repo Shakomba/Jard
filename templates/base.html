@@ -1382,12 +1382,9 @@ a[href^="mailto"],
           return;
         }
 
-        // Show instant loading state (optional fade)
-        const mainEl = document.getElementById('appMain');
-        if (mainEl) {
-          mainEl.style.opacity = '0.7';
-          mainEl.style.pointerEvents = 'none';
-        }
+        // Update active nav state immediately for instant visual feedback
+        updateActiveNav(target.href);
+        if (push) window.history.pushState({}, '', target.href);
 
         let res;
         try {
@@ -1397,10 +1394,6 @@ a[href^="mailto"],
             credentials: 'same-origin'
           });
         } catch (_) {
-          if (mainEl) {
-            mainEl.style.opacity = '';
-            mainEl.style.pointerEvents = '';
-          }
           window.location.href = target.href;
           return;
         }
@@ -1424,17 +1417,6 @@ a[href^="mailto"],
 
         // Swap header/flash/main
         swapFromDoc(doc);
-
-        if (push) window.history.pushState({}, '', target.href);
-
-        // Update active navigation state
-        updateActiveNav(target.href);
-
-        // Restore opacity immediately for instant feel
-        if (mainEl) {
-          mainEl.style.opacity = '';
-          mainEl.style.pointerEvents = '';
-        }
 
         // Scroll to top instantly (no smooth scroll for faster feel)
         window.scrollTo({ top: 0, behavior: 'instant' });

@@ -13,6 +13,7 @@ from urllib.parse import urlparse, urljoin
 import qrcode
 from flask import Flask, render_template, redirect, url_for, request, flash, abort, send_file, session, has_request_context, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 from sqlalchemy import func, inspect, text
 
@@ -592,6 +593,10 @@ TRANSLATIONS = {
 
 def create_app():
     app = Flask(__name__)
+    
+    # Handle reverse proxy headers (X-Forwarded-For, X-Forwarded-Proto, etc.)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+    
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///roommates.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -1485,7 +1490,7 @@ def create_app():
             leave_block_reason=leave_block_reason,
         )
 
-    @app.post("/household/leave")
+    @app.route("/household/leave", methods=["GET", "POST"])
     @login_required
     def leave_household():
         hid = require_household_id()

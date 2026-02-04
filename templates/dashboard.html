@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 
+<style>
+  .welcome-text {
+    color: #ffffff;
+  }
+  :root[data-theme="light"] .welcome-text {
+    color: #0f172a;
+  }
+</style>
+
 <!-- Mobile-only logo -->
 <div class="flex justify-center mb-8 sm:hidden">
   <div class="h-32 w-32">
@@ -11,8 +20,8 @@
 
 <div class="flex flex-col items-center text-center gap-2 mb-8">
   <h1 class="text-3xl sm:text-4xl font-bold">
-    <span class="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">{{ t('dashboard.welcome') }},</span>
-    <span class="text-slate-100">{{ current_user.name }}</span>
+    <span class="welcome-text">{{ t('dashboard.welcome') }},</span>
+    <span class="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">{{ current_user.name }}</span>
   </h1>
 </div>
 

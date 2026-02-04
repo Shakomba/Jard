@@ -22,13 +22,21 @@
   }
 </style>
 
+{% if lang == 'ku' %}
+<style>
+  /* Slightly increase spacing between the two specified headings and their subtitles for Kurdish */
+  .profile-main-heading { margin-bottom: 0.7rem !important; }
+  .profile-pref-heading { margin-bottom: 0.7rem !important; }
+</style>
+{% endif %}
+
 <div class="w-full max-w-3xl mx-auto space-y-6">
   <div class="card rounded-3xl p-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-semibold">{{ t('profile.title') }}</h1>
-        <div class="text-sm text-slate-300">{{ t('profile.subtitle') }}</div>
-      </div>
+          <h1 class="text-2xl font-semibold profile-main-heading">{{ t('profile.title') }}</h1>
+          <div class="text-sm text-slate-300">{{ t('profile.subtitle') }}</div>
+        </div>
     </div>
 
     <form id="profileUpdateForm" class="mt-6 space-y-4" method="post" action="{{ url_for('profile_update') }}"
@@ -62,10 +70,15 @@
         </div>
       </div>
 
-      <div class="soft rounded-3xl p-5">
-        <div class="text-xs uppercase tracking-widest text-slate-400">{{ t('profile.password_heading') }}</div>
-        <div class="mt-3 grid md:grid-cols-2 gap-4">
-          <div class="md:col-span-2">
+      <div class="pt-4 border-t border-white/10">
+        <div class="flex items-center gap-2 mb-5">
+          <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          <span class="text-base font-semibold text-slate-200">{{ t('profile.password_heading') }}</span>
+        </div>
+        <div class="grid gap-4">
+          <div>
             <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('profile.current_password') }}</label>
             <div class="relative">
               <input id="currentPassword" name="current_password" type="password"
@@ -80,34 +93,36 @@
               </button>
             </div>
           </div>
-          <div>
-            <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('profile.new_password') }}</label>
-            <div class="relative">
-              <input id="newPassword" name="new_password" type="password"
-                     class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-                     dir="ltr">
-              <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('newPassword', this)">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  <path class="eye-closed hidden" stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83M9.363 5.365A9.466 9.466 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.716 9.716 0 01-1.676 2.635m-1.224 1.224A9.467 9.467 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.716 9.716 0 011.676-2.635"/>
-                </svg>
-              </button>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('profile.new_password') }}</label>
+              <div class="relative">
+                <input id="newPassword" name="new_password" type="password"
+                       class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+                       dir="ltr">
+                <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('newPassword', this)">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    <path class="eye-closed hidden" stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83M9.363 5.365A9.466 9.466 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.716 9.716 0 01-1.676 2.635m-1.224 1.224A9.467 9.467 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.716 9.716 0 011.676-2.635"/>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-          <div>
-            <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('profile.confirm_new_password') }}</label>
-            <div class="relative">
-              <input id="confirmNewPassword" name="confirm_password" type="password"
-                     class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
-                     dir="ltr">
-              <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('confirmNewPassword', this)">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  <path class="eye-closed hidden" stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83M9.363 5.365A9.466 9.466 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.716 9.716 0 01-1.676 2.635m-1.224 1.224A9.467 9.467 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.716 9.716 0 011.676-2.635"/>
-                </svg>
-              </button>
+            <div>
+              <label style="text-align: {{ 'right' if lang == 'ku' else 'left' }} !important;" class="block w-full text-sm text-slate-200" dir="{{ 'rtl' if lang == 'ku' else 'ltr' }}">{{ t('profile.confirm_new_password') }}</label>
+              <div class="relative">
+                <input id="confirmNewPassword" name="confirm_password" type="password"
+                       class="mt-1 w-full px-4 py-3 pr-12 rounded-2xl input focus:outline-none focus:ring-2 focus:ring-violet-400"
+                       dir="ltr">
+                <button type="button" class="no-hover absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 transition outline-none" onclick="togglePassword('confirmNewPassword', this)">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    <path class="eye-closed hidden" stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83M9.363 5.365A9.466 9.466 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.716 9.716 0 01-1.676 2.635m-1.224 1.224A9.467 9.467 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.716 9.716 0 011.676-2.635"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -121,7 +136,7 @@
 
   <div class="card rounded-3xl p-6">
     <div class="mb-4">
-      <h2 class="text-xl font-semibold">{{ t('profile.preferences') }}</h2>
+      <h2 class="text-xl font-semibold profile-pref-heading">{{ t('profile.preferences') }}</h2>
       <div class="text-sm text-slate-300">{{ t('profile.preferences_subtitle') }}</div>
     </div>
 

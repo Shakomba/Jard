@@ -227,6 +227,22 @@
         display: none;
       }
     }
+
+    /* Desktop top nav: SPA sets `.active` class; style it here. */
+    #topNav a.active {
+      background: rgba(139, 92, 246, 0.15);
+      box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.20);
+    }
+    #topNav a.active:hover {
+      background: rgba(139, 92, 246, 0.18);
+    }
+    :root[data-theme="light"] #topNav a.active {
+      background: rgba(139, 92, 246, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.22);
+    }
+    :root[data-theme="light"] #topNav a.active:hover {
+      background: rgba(139, 92, 246, 0.16);
+    }
     
     #appHeader {
       transition: border-radius .12s ease, box-shadow .12s ease, transform .12s ease;
@@ -727,7 +743,7 @@ a[href^="mailto"],
 
 {% set ep = request.endpoint or "" %}
 {% set is_auth_page = ep in ["login", "register", "register_verify", "register_profile", "forgot_password", "reset_password", "verify_required"] %}
-{% set hide_navbar = ep in ["login", "register", "register_verify", "register_profile", "forgot_password"] %}
+{% set hide_navbar = ep in ["login", "register", "register_verify", "register_profile", "forgot_password", "reset_password"] %}
 
 <body class="min-h-screen text-slate-100{% if hide_navbar %} no-mobile-padding{% endif %}">
   <div id="appRoot" class="{% if not hide_navbar %}max-w-7xl mx-auto px-4 {% if is_auth_page %}pt-12 pb-6{% else %}py-3{% endif %}{% endif %}" style="overflow: visible;">
@@ -818,11 +834,9 @@ a[href^="mailto"],
         {% endif %}
 
         {% if current_user.is_authenticated and not is_auth_page and has_household %}
-          {% set link_base = "px-4 py-2.5 rounded-xl transition inline-flex items-center gap-2" %}
-          {% set active = "bg-violet-500/15 ring-1 ring-inset ring-violet-400/20" %}
-          {% set inactive = "hover:bg-white/10" %}
+          {% set link_base = "px-4 py-2.5 rounded-xl transition inline-flex items-center gap-2 hover:bg-white/10" %}
           <nav id="topNav" class="w-full flex flex-nowrap overflow-x-auto no-scrollbar items-center gap-2 text-base whitespace-nowrap justify-start sm:justify-center px-2 sm:px-1 sm:col-start-2 sm:row-start-1">
-              <a class="{{ link_base }} {{ active if ep=='dashboard' else inactive }}" href="{{ url_for('dashboard') }}">
+              <a class="{{ link_base }} {{ 'active' if ep=='dashboard' else '' }}" href="{{ url_for('dashboard') }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="3" width="7" height="7" rx="1"/>
                   <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -831,20 +845,20 @@ a[href^="mailto"],
                 </svg>
                 {{ t('nav.dashboard') }}
               </a>
-              <a class="{{ link_base }} {{ active if ep=='expenses' else inactive }}" href="{{ url_for('expenses') }}">
+              <a class="{{ link_base }} {{ 'active' if ep=='expenses' else '' }}" href="{{ url_for('expenses') }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
                 {{ t('nav.expenses') }}
               </a>
-              <a class="{{ link_base }} {{ active if ep=='household' else inactive }}" href="{{ url_for('household') }}">
+              <a class="{{ link_base }} {{ 'active' if ep=='household' else '' }}" href="{{ url_for('household') }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/>
                   <circle cx="14" cy="12" r="0.8" fill="currentColor"/>
                 </svg>
                 {{ t('nav.household') }}
               </a>
-              <a class="{{ link_base }} {{ active if ep=='archive' else inactive }}" href="{{ url_for('archive') }}">
+              <a class="{{ link_base }} {{ 'active' if ep=='archive' else '' }}" href="{{ url_for('archive') }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M21 8v13H3V8"/>
                   <path stroke-linecap="round" stroke-linejoin="round" d="M1 3h22v5H1z"/>

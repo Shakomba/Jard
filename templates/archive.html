@@ -28,14 +28,20 @@
   /* Custom Archive Filter Dropdowns */
   .archive-select {
     position: relative;
-    z-index: 10;
+    z-index: 1;
   }
   .archive-select.open {
-    z-index: 20;
+    z-index: 9999;
   }
   .archive-select-btn {
     cursor: pointer;
     text-align: start;
+    background: rgba(18, 18, 27, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
   }
   .archive-select-btn:hover {
     background: rgba(18, 18, 27, 0.95);
@@ -44,19 +50,15 @@
   .archive-select-btn:focus,
   .archive-select-btn.open {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--focus);
+    border-color: rgb(139, 92, 246);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
   }
   .archive-select-btn.open .archive-select-arrow {
     transform: rotate(180deg);
   }
   .archive-select-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1;
-    margin-top: 0.5rem;
+    position: fixed;
+    z-index: 2147483647;
     background: rgba(18, 18, 27, 0.98);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 1.25rem;
@@ -92,12 +94,44 @@
     background: rgba(139, 92, 246, 0.15);
   }
   .archive-select-option.selected {
-    background: var(--accent);
+    background: rgb(139, 92, 246);
     color: white;
   }
   .archive-select-option.selected:hover {
-    background: var(--accent);
+    background: rgb(139, 92, 246);
   }
+  
+  /* Light mode styles */
+  :root[data-theme="light"] .archive-select-btn {
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #0f172a;
+  }
+  :root[data-theme="light"] .archive-select-btn:hover {
+    background: #f8fafc;
+    border-color: rgba(148, 163, 184, 0.3);
+  }
+  :root[data-theme="light"] .archive-select-btn:focus,
+  :root[data-theme="light"] .archive-select-btn.open {
+    border-color: rgb(139, 92, 246);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  }
+  :root[data-theme="light"] .archive-select-dropdown {
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.15), 0 4px 16px rgba(15, 23, 42, 0.1);
+  }
+  :root[data-theme="light"] .archive-select-option {
+    color: #0f172a;
+  }
+  :root[data-theme="light"] .archive-select-option:hover {
+    background: rgba(139, 92, 246, 0.1);
+  }
+  :root[data-theme="light"] .archive-select-option.selected {
+    background: rgb(139, 92, 246);
+    color: white;
+  }
+  
   @media (min-width: 641px) {
     .archive-select-dropdown {
       padding: 0.375rem;
@@ -111,7 +145,7 @@
   }
 </style>
 
-<div class="flex flex-col items-center gap-6 pb-64" style="overflow: visible;">
+<div class="flex flex-col items-center gap-6 pb-10 sm:pb-12" style="overflow: visible;">
   <!-- Header -->
   <div class="flex flex-col items-center text-center gap-2 mb-2">
     <h1 class="text-3xl sm:text-4xl font-bold">
@@ -354,6 +388,70 @@
 
     if (!sortSelect || !settleSelect || !personSelect) return;
 
+    const dropdownMounts = new WeakMap();
+    const selectToDropdown = new WeakMap();
+
+    function mountDropdownToBody(select, dropdown) {
+      if (dropdownMounts.has(dropdown)) return;
+
+      const placeholder = document.createComment('archive-select-dropdown-placeholder');
+      dropdown.parentNode?.insertBefore(placeholder, dropdown);
+      dropdownMounts.set(dropdown, { placeholder, originalParent: select });
+      document.body.appendChild(dropdown);
+    }
+
+    function restoreDropdown(dropdown) {
+      const mount = dropdownMounts.get(dropdown);
+      if (!mount) return;
+      const { placeholder } = mount;
+      if (placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(dropdown, placeholder);
+        placeholder.parentNode.removeChild(placeholder);
+      }
+      dropdownMounts.delete(dropdown);
+      dropdown.style.left = '';
+      dropdown.style.top = '';
+      dropdown.style.width = '';
+      dropdown.style.maxHeight = '';
+    }
+
+    function positionDropdown(btn, dropdown) {
+      const rect = btn.getBoundingClientRect();
+      const gap = 8;
+
+      let left = rect.left;
+      const width = rect.width;
+      const top = rect.bottom + gap;
+
+      // Keep within viewport horizontally
+      const maxLeft = Math.max(8, window.innerWidth - width - 8);
+      left = Math.min(Math.max(8, left), maxLeft);
+
+      dropdown.style.left = `${left}px`;
+      dropdown.style.top = `${top}px`;
+      dropdown.style.width = `${width}px`;
+
+      const availableHeight = Math.max(120, window.innerHeight - top - 12);
+      dropdown.style.maxHeight = `${Math.min(280, availableHeight)}px`;
+    }
+
+    function closeSelect(select) {
+      const btn = select.querySelector('.archive-select-btn');
+      const dropdown = selectToDropdown.get(select) || select.querySelector('.archive-select-dropdown');
+      if (btn) btn.classList.remove('open');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+        restoreDropdown(dropdown);
+      }
+    }
+
+    function closeAll(exceptSelect = null) {
+      document.querySelectorAll('.archive-select').forEach(s => {
+        if (exceptSelect && s === exceptSelect) return;
+        closeSelect(s);
+      });
+    }
+
     // Initialize all custom dropdowns
     document.querySelectorAll('.archive-select').forEach(select => {
       const btn = select.querySelector('.archive-select-btn');
@@ -363,23 +461,24 @@
 
       if (!btn || !dropdown) return;
 
+      selectToDropdown.set(select, dropdown);
+
       // Toggle dropdown on button click
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // Close all other dropdowns
-        document.querySelectorAll('.archive-select').forEach(other => {
-          if (other !== select) {
-            other.querySelector('.archive-select-btn')?.classList.remove('open');
-            other.querySelector('.archive-select-dropdown')?.classList.remove('open');
-          }
-        });
-
-        // Toggle this dropdown
         const isOpen = dropdown.classList.contains('open');
-        btn.classList.toggle('open', !isOpen);
-        dropdown.classList.toggle('open', !isOpen);
+        if (isOpen) {
+          closeSelect(select);
+          return;
+        }
+
+        closeAll(select);
+        mountDropdownToBody(select, dropdown);
+        positionDropdown(btn, dropdown);
+        btn.classList.add('open');
+        dropdown.classList.add('open');
       });
 
       // Handle option selection
@@ -401,8 +500,7 @@
           option.classList.add('selected');
 
           // Close dropdown
-          btn.classList.remove('open');
-          dropdown.classList.remove('open');
+          closeSelect(select);
 
           // Sync visibility if sort changed
           if (select.id === 'sortSelect') {
@@ -414,10 +512,26 @@
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.archive-select')) {
-        document.querySelectorAll('.archive-select-btn').forEach(btn => btn.classList.remove('open'));
-        document.querySelectorAll('.archive-select-dropdown').forEach(dd => dd.classList.remove('open'));
-      }
+      if (e.target.closest('.archive-select') || e.target.closest('.archive-select-dropdown')) return;
+      closeAll();
+    });
+
+    // Keep positioned on scroll/resize
+    function repositionOpenDropdowns() {
+      document.querySelectorAll('.archive-select').forEach(select => {
+        const btn = select.querySelector('.archive-select-btn');
+        const dropdown = selectToDropdown.get(select) || select.querySelector('.archive-select-dropdown');
+        if (!btn || !dropdown) return;
+        if (!dropdown.classList.contains('open')) return;
+        positionDropdown(btn, dropdown);
+      });
+    }
+    window.addEventListener('scroll', repositionOpenDropdowns, { passive: true });
+    window.addEventListener('resize', repositionOpenDropdowns);
+
+    // Close on escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAll();
     });
 
     // Sync settle/person dropdown visibility based on sort value

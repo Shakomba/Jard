@@ -82,6 +82,14 @@
     html[dir="rtl"] #topNav button {
       direction: rtl;
     }
+
+    /* Always keep password inputs LTR (field only, not labels). */
+    input[type="password"],
+    input[type="password"]::placeholder {
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: plaintext;
+    }
     
     body {
       background:
@@ -1379,7 +1387,7 @@ a[href^="mailto"],
         return scripts;
       }
 
-      function swapFromDoc(doc) {
+      function swapFromDoc(doc, { swapHeader = true } = {}) {
         const newHeader = doc.getElementById('appHeader');
         const newFlash = doc.getElementById('flashMessages');
         const newMain = doc.getElementById('appMain');
@@ -1388,10 +1396,93 @@ a[href^="mailto"],
         const curFlash = document.getElementById('flashMessages');
         const curMain = document.getElementById('appMain');
 
-        if (newHeader && curHeader) curHeader.replaceWith(newHeader);
+        if (swapHeader && newHeader && curHeader) curHeader.replaceWith(newHeader);
         if (newFlash && curFlash) curFlash.replaceWith(newFlash);
         if (newMain && curMain) curMain.replaceWith(newMain);
         if (window.syncMenuUI) window.syncMenuUI();
+      }
+
+      const TAB_PATHS = new Set(['/dashboard', '/expenses', '/household', '/archive']);
+      const tabCache = new Map();
+
+      function isTabUrl(u) {
+        try {
+          const url = new URL(u, window.location.href);
+          return TAB_PATHS.has(url.pathname) && !url.search;
+        } catch {
+          return false;
+        }
+      }
+
+      function makeCacheKey(url) {
+        const u = new URL(url, window.location.href);
+        return u.origin + u.pathname; // no query for tabs
+      }
+
+      function cacheFromHtml(url, html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const title = doc.querySelector('title')?.textContent || '';
+        const newMain = doc.getElementById('appMain');
+        if (!newMain) return;
+        const scripts = extractAndRemoveScripts(newMain);
+        const scriptSpecs = scripts.map(s => ({
+          src: s.getAttribute('src'),
+          type: s.getAttribute('type'),
+          text: s.textContent || ''
+        }));
+
+        tabCache.set(makeCacheKey(url), {
+          title,
+          mainOuterHTML: newMain.outerHTML,
+          flashOuterHTML: doc.getElementById('flashMessages')?.outerHTML || null,
+          scriptSpecs
+        });
+      }
+
+      async function runScriptSpecsInOrder(specs) {
+        if (!specs || !specs.length) return;
+        for (const spec of specs) {
+          if (spec.src) {
+            await loadExternalScript(new URL(spec.src, window.location.href).toString());
+            continue;
+          }
+          const inline = document.createElement('script');
+          if (spec.type) inline.type = spec.type;
+          inline.textContent = spec.text;
+          document.body.appendChild(inline);
+          inline.remove();
+        }
+      }
+
+      function applyTabCache(url) {
+        const key = makeCacheKey(url);
+        const cached = tabCache.get(key);
+        if (!cached) return false;
+
+        if (cached.title) document.title = cached.title;
+
+        const curMain = document.getElementById('appMain');
+        if (curMain) {
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = cached.mainOuterHTML;
+          const nextMain = wrapper.firstElementChild;
+          if (nextMain) curMain.replaceWith(nextMain);
+        }
+
+        if (cached.flashOuterHTML) {
+          const curFlash = document.getElementById('flashMessages');
+          if (curFlash) {
+            const fw = document.createElement('div');
+            fw.innerHTML = cached.flashOuterHTML;
+            const nextFlash = fw.firstElementChild;
+            if (nextFlash) curFlash.replaceWith(nextFlash);
+          }
+        }
+
+        if (window.syncMenuUI) window.syncMenuUI();
+        // Run scripts for the cached page.
+        runScriptSpecsInOrder(cached.scriptSpecs);
+        return true;
       }
 
       async function navigate(url, { push = true } = {}) {
@@ -1407,9 +1498,17 @@ a[href^="mailto"],
           return;
         }
 
+        const isTab = TAB_PATHS.has(target.pathname) && !target.search;
+
         // Update active nav state immediately for instant visual feedback
         updateActiveNav(target.href);
         if (push) window.history.pushState({}, '', target.href);
+
+        // Instant tab switching from in-memory cache (no network)
+        if (isTab && applyTabCache(target.href)) {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+          return;
+        }
 
         let res;
         try {
@@ -1440,8 +1539,13 @@ a[href^="mailto"],
         const newMain = doc.getElementById('appMain');
         const scripts = extractAndRemoveScripts(newMain);
 
-        // Swap header/flash/main
-        swapFromDoc(doc);
+        // Cache tab pages after fetching (for instant next switch)
+        if (isTab) {
+          try { cacheFromHtml(target.href, html); } catch (_) {}
+        }
+
+        // Swap flash/main (keep header stable for tabs)
+        swapFromDoc(doc, { swapHeader: !isTab });
 
         // Scroll to top instantly (no smooth scroll for faster feel)
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1501,16 +1605,50 @@ a[href^="mailto"],
         const href = a.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
         if (!sameOrigin(href)) return;
+
+        // Only SPA-navigate for the main tabs to keep things reliable.
+        const targetUrl = new URL(href, window.location.href);
+        if (!TAB_PATHS.has(targetUrl.pathname) || targetUrl.search) return;
+
         e.preventDefault();
-        navigate(href, { push: true });
+        navigate(targetUrl.href, { push: true });
       });
 
       window.addEventListener('popstate', () => {
-        navigate(window.location.href, { push: false });
+        const u = new URL(window.location.href);
+        if (TAB_PATHS.has(u.pathname) && !u.search) {
+          navigate(u.href, { push: false });
+        } else {
+          window.location.href = u.href;
+        }
       });
 
       // Initialize FAB visibility on page load
       updateActiveNav(window.location.href);
+
+      // Seed cache with the current page if it's a tab
+      if (isTabUrl(window.location.href)) {
+        try { cacheFromHtml(window.location.href, document.documentElement.outerHTML); } catch (_) {}
+      }
+
+      // Prefetch other tabs after load so switching feels instant.
+      const prefetchTabs = () => {
+        const origin = window.location.origin;
+        for (const path of TAB_PATHS) {
+          const full = origin + path;
+          const key = makeCacheKey(full);
+          if (tabCache.has(key)) continue;
+          fetch(full, { method: 'GET', headers: { 'X-Requested-With': 'prefetch' }, credentials: 'same-origin' })
+            .then(r => (r.ok && !r.redirected) ? r.text() : null)
+            .then(t => { if (t) cacheFromHtml(full, t); })
+            .catch(() => {});
+        }
+      };
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(prefetchTabs, { timeout: 1500 });
+      } else {
+        setTimeout(prefetchTabs, 600);
+      }
 
     })();
 

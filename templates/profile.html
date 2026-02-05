@@ -128,6 +128,8 @@
         </div>
       </div>
 
+      <div id="profileFormError" class="mt-4 text-sm text-rose-400 text-center hidden"></div>
+
       <button type="submit" class="w-full py-3 rounded-2xl bg-violet-500 hover:bg-violet-400 transition font-semibold text-white">
         {{ t('profile.save_changes') }}
       </button>
@@ -469,6 +471,7 @@
 
     // Handle profile update with AJAX
     const profileForm = document.getElementById('profileUpdateForm');
+    const profileFormError = document.getElementById('profileFormError');
     if (profileForm) {
       profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -477,6 +480,12 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
 
+        // Clear previous errors
+        if (profileFormError) {
+          profileFormError.classList.add('hidden');
+          profileFormError.textContent = '';
+        }
+
         await submitFormAjax(profileForm, {
           onSuccess: () => {
             navigate(window.location.href, { push: false });
@@ -484,6 +493,22 @@
           onError: () => {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
+
+            // Check for flash messages and show as inline error
+            const flashMessages = document.querySelectorAll('#flashMessages [data-flash-category="error"]');
+            if (flashMessages.length > 0 && profileFormError) {
+              const errorMsg = flashMessages[0].getAttribute('data-flash-message');
+              if (errorMsg) {
+                profileFormError.textContent = errorMsg;
+                profileFormError.classList.remove('hidden');
+                
+                // Hide the top flash messages
+                const flashContainer = document.getElementById('flashMessages');
+                if (flashContainer) {
+                  flashContainer.innerHTML = '';
+                }
+              }
+            }
           }
         });
       });

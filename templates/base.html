@@ -245,7 +245,7 @@
     }
     
     #appHeader {
-      transition: border-radius .12s ease, box-shadow .12s ease, transform .12s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .header-shell.docked {
       top: 0 !important;
@@ -253,6 +253,10 @@
       border-top-right-radius: 0 !important;
       border-bottom-left-radius: 1.5rem !important;
       border-bottom-right-radius: 1.5rem !important;
+    }
+    #appHeaderSpacer {
+      transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 2.5rem;
     }
     .soft {
       background: rgba(15, 16, 23, 0.60);
@@ -1211,23 +1215,27 @@ a[href^="mailto"],
         try {
           const isDesktop = window.matchMedia('(min-width: 641px)').matches;
           const isFixed = header.classList.contains('app-header-fixed');
-          if (spacer) {
-            if (isDesktop && isFixed) {
-              const isDocked = header.classList.contains('docked');
-              // When floating (top-3), include that offset; when docked (top-0), don't.
-              spacer.style.height = (header.offsetHeight + (isDocked ? 0 : 12)) + 'px';
-            } else {
+          
+          // Dock styling when scrolling down (more reliable than rect.top for fixed headers).
+          if (header.classList.contains('header-shell')) {
+            const shouldDock = (window.scrollY || 0) > 2;
+            const wasDocked = header.classList.contains('docked');
+            header.classList.toggle('docked', shouldDock);
+            
+            // Update spacer immediately to match the new state
+            if (spacer && isDesktop && isFixed) {
+              // Always use the base header height - the navbar position handles visual offset
+              const targetHeight = header.offsetHeight + 'px';
+              if (spacer.style.height !== targetHeight) {
+                spacer.style.height = targetHeight;
+              }
+            } else if (spacer) {
               spacer.style.height = '0px';
             }
           }
         } catch (_) {
           // ignore
         }
-
-        // Dock styling when scrolling down (more reliable than rect.top for fixed headers).
-        if (!header.classList.contains('header-shell')) return;
-        const shouldDock = (window.scrollY || 0) > 2;
-        header.classList.toggle('docked', shouldDock);
       }
 
       syncHeaderDock();
@@ -1771,6 +1779,13 @@ a[href^="mailto"],
               if (flashMessages) {
                 const currentFlash = document.getElementById('flashMessages');
                 if (currentFlash) currentFlash.innerHTML = flashMessages.innerHTML;
+                
+                // Check if there are error flash messages - if so, call onError instead of onSuccess
+                const errorFlashes = flashMessages.querySelectorAll('[data-flash-category="error"]');
+                if (errorFlashes.length > 0) {
+                  if (options.onError) options.onError(doc);
+                  return doc;
+                }
               }
             }
             if (options.onSuccess && doc) options.onSuccess(doc);

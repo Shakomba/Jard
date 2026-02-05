@@ -66,6 +66,13 @@
       margin: 0;
       padding: 0;
     }
+    /* Desktop: disable overscroll (bounce/scroll chaining). */
+    @media (min-width: 641px) {
+      html,
+      body {
+        overscroll-behavior: none;
+      }
+    }
     html {
       /* Overscroll (bounce) background should be a solid theme color. */
       background-color: #000;
